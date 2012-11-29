@@ -12,7 +12,7 @@
 
 		
 		public function __construct(&$parent, $env=NULL, $process_params=true){
-			parent::__construct($parent, $env, $process_params);
+			//parent::__construct($parent, $env, $process_params);
 			$this->_dependencies = array();
 			
 			$urlParams = array();
@@ -63,6 +63,17 @@
 
 			try{
 			
+				include(dirname(__FILE__) . "/../lib/gatewayfactory.class.php");
+				
+				$gatewayList = PaymentGatewayFactory::getGatewayList();
+				
+				if(is_array($gatewayList)) {
+				
+					foreach($gatewayList as $g) {
+						$this->dsSTATIC .= "<gateway>" . $g . "</gateway>";							
+					}
+					
+				}
 				
 				include(TOOLKIT . '/data-sources/datasource.static.php');
 			}

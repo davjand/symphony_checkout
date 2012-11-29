@@ -4,15 +4,27 @@
 
 		public function install() {
 
-			Symphony::Database()->query('CREATE TABLE IF NOT EXISTS `tbl_fields_sagepay_transaction` (
+			Symphony::Database()->query('CREATE TABLE IF NOT EXISTS `tbl_fields_transaction` (
 					`id` int(11) unsigned NOT NULL auto_increment,
 					`field_id` int(11) unsigned NOT NULL,
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 			);');		
 		
+		
 		}
-
+	
+		public function fetchNavigation(){ 
+			return array(
+				array(
+					'location'	=> __('System'),
+					'name'		=> __('Checkout Configuration'),
+					'link'		=> '/',
+					'limit'		=> 'developer'
+				)
+			);
+		}	
+		
 		public function uninstall() {
 		
 		}

@@ -5,33 +5,12 @@
 	Class fieldTransaction extends Field{
 
 		private $subFields = array(
-						"vendor", 
-						"vendor-tx-code", 
-						"amount", 
-						"currency",
-						"billing-firstnames",
-						"billing-surname",
-						"billing-address1",
-						"billing-address2",
-						"billing-city",
-						"billing-postcode",
-						"billing-country",
-						"billing-state",
-						"billing-phone",
-						"delivery-firstnames",
-						"delivery-surname",
-						"delivery-address1",
-						"delivery-address2",
-						"delivery-city",
-						"delivery-postcode",
-						"delivery-state",
-						"delivery-phone",
-						"customer-email"
+						"total-amount"
 					);
 	
 		public function __construct() {
 			parent::__construct();
-			$this->_name = "Sagepay Transaction";
+			$this->_name = "Transaction";
 		}
 	
 		public function commit(){

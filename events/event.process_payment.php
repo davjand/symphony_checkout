@@ -11,7 +11,7 @@
 
 		public static function about(){
 			return array(
-					 'name' => 'Run Sagepay',
+					 'name' => 'Process Payment',
 					 'author' => array(
 							'name' => 'Tom Johnson',
 							'website' => 'http://www.devjet.co.uk',
