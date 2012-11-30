@@ -47,8 +47,12 @@ class contentExtensionCheckoutIndex extends AdministrationPage
     }
 	
 	public function action() {
-		print_r($_POST);
-		if(isset($_POST["action"]["save"])) {		
+		if(isset($_POST["action"]["save"])) {
+			
+			$configFilename = dirname(__FILE__) . "/../config.php";
+			
+			file_put_contents($configFilename, "<?php \$savedSettings = " . var_export($_POST["settings"], true) . "; ?>");
+		
 			$this->pageAlert(__('Configuration Settings updated successfully.'), Alert::SUCCESS);
 		}
 	}
@@ -63,40 +67,59 @@ class contentExtensionCheckoutIndex extends AdministrationPage
 		
 		$gatewayList = new datasourceavailable_gateways(Administration::instance(), array());
 		$gatewayListXml = $gatewayList->grab();
-
-
-		## Get Configuration Settings and display as a table list
-		$config_settings = Symphony::Configuration()->get();
-
-		$count = 0;
+	
 		
-		$acronymsarray = array( 'db', 'gc', 'tbl', 'xml' );
-		$smallwordsarray = array( 'in' );
-
+		// Get the saved settings from the file - this will populate $savedSettings
+		include(dirname(__FILE__) . "/../config.php");
+	
+		// General settings section
 		$fieldset = new XMLElement('fieldset');
 		$fieldset->setAttribute('class', 'settings type-file');
 		$fieldset->appendChild(new XMLElement('legend', __("General")));
-		
 		$label = Widget::Label("Active Gateways");
-		
 		$activeOptions = array();
-
-		//include(dirname(__FILE__) . "/../lib/gatewayfactory.class.php");
 		$gatewayList = PaymentGatewayFactory::getGatewayList();	
-	
 		foreach($gatewayList as $g) {
-			$activeOptions[] = array(strtolower($g), false, $g);
+			$isItemSelected = false;
+			if(is_array($savedSettings["general"]["gateways"])) {
+				if(in_array(strtolower($g), $savedSettings["general"]["gateways"])) {
+					$isItemSelected = true;
+				}
+			}
+			$activeOptions[] = array(strtolower($g), $isItemSelected, $g);
 		}
-	
-	
 		$label->appendChild(Widget::Select("settings[general][gateways][]", $activeOptions, array("multiple" => "multiple")));	
-		
-		//$label->appendChild(Widget::Input("settings[test]", "hello", "text"));
 		$fieldset->appendChild($label);
-		
 		$this->Form->appendChild($fieldset);
 
-		## Save Button
+		
+		// Retrieve all the gateway setting names
+		$gatewaySettings = array();
+		$classArr = get_declared_classes();
+		foreach($classArr as $c) {
+			if(is_subclass_of($c, "PaymentGateway")) {
+				$tmpC = new $c();
+				$detailsArr = $tmpC->getDetailsArray();
+				$gatewaySettings[$detailsArr["name"]] = $tmpC->getConfigArray();
+			}
+		}		
+
+		
+		// Add settings for each of the included gateways
+		foreach($gatewaySettings as $g => $c) {
+			$fieldset = new XMLElement('fieldset');
+			$fieldset->setAttribute('class', 'settings type-file');
+			$fieldset->appendChild(new XMLElement('legend', __($g)));
+			foreach($c as $item) {
+				$label = Widget::Label($item);
+				$label->appendChild(Widget::Input("settings[{$g}][{$item}]", $savedSettings[$g][$item]));
+				$fieldset->appendChild($label);
+			}			
+			$this->Form->appendChild($fieldset);
+		}
+		
+		
+		
 		$div = new XMLElement('div');
 		$div->setAttribute('class', 'actions');
 		$div->appendChild(Widget::Input('action[save]', __('Save Settings'), 'submit', array('accesskey' => 's')));
