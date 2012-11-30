@@ -27,7 +27,7 @@ abstract class PaymentGateway {
 	
 	abstract public function getDetailsArray();
 	
-	abstract public function processTransaction();
+	abstract public function processTransaction($transactionFieldData);
 	abstract public function processPaymentNotification();
 
 }
