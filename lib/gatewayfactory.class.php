@@ -11,9 +11,11 @@ class PaymentGatewayFactory {
 	public static function includeGateways() {		
 		$includeDir = opendir( dirname(__FILE__) . "./gateways/" );
 		while( false !== ( $includeFile = readdir( $includeDir ) ) ) {
-			if( ( $includeFile != "." ) && ( $includeFile != ".." ) ) {
-				$iPath =  "/gateways/" . $includeFile;
-				include_once($iPath);
+			if( ( $includeFile != "." ) && ( $includeFile != ".." )) {
+				$iPath =  dirname(__FILE__) . "/gateways/" . $includeFile;
+				if(!is_dir($iPath)) {
+					include_once($iPath);
+				}
 			}
 		}
 		closedir( $includeDir );
@@ -37,6 +39,18 @@ class PaymentGatewayFactory {
 		
 		return $gatewayArr;
 	
+	}
+	
+	public static function createGateway($name) {
+		
+		if(class_exists($name)) {
+			$gateway = new $name();
+			return $gateway;
+		}
+		else {
+			return null;
+		}
+		
 	}
 
 

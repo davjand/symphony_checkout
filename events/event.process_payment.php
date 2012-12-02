@@ -34,7 +34,29 @@
 		}
 
 		public function load(){
+
+			$gwName = "SagepayGateway";
 		
+			// creates $savedSettings;
+			include(dirname(__FILE__) . "/../config.php");
+			
+			include(dirname(__FILE__) . "/../lib/gatewayfactory.class.php");
+			
+			$gateway = PaymentGatewayFactory::createGateway($gwName);
+			
+			$transactionData = array();
+			
+			$passedFieldsCheck = true;			
+			// check we have all the fields that we should
+			foreach($gateway->getRequiredFieldsArray() as $d) {
+				if(!in_array($transactionData)) {
+					$passedFieldsCheck = false;
+				}
+			}			
+			
+			if($passedFieldsCheck) {			
+				$gateway->processTransaction($passedFieldsCheck , $savedSettings[$gwName]);
+			}
 			
 		}
 	}

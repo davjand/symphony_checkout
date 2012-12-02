@@ -7,6 +7,7 @@
 			Symphony::Database()->query('CREATE TABLE IF NOT EXISTS `tbl_fields_transaction` (
 					`id` int(11) unsigned NOT NULL auto_increment,
 					`field_id` int(11) unsigned NOT NULL,
+					`mappings` MEDIUMTEXT NOT NULL,
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 			);');		
@@ -26,7 +27,11 @@
 		}	
 		
 		public function uninstall() {
-		
+			if(parent::uninstall() == true){
+				Symphony::Database()->query("DROP TABLE `tbl_fields_transaction`");
+				return true;
+			}
+			return false;		
 		}
 /*
 		public function getSubscribedDelegates(){

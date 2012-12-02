@@ -28,10 +28,9 @@ class SagePay
                 $standardFields = array(), // holds standard SagePay info (currency etc)
                 $response = array(),    // response from SagePay cURL request
                 $description = 'New order from your online store',      // Description of the order sent to SagePay
-                $curl_str = '';         // the url encoded string derrived from the $this->data array
-        
+                $curl_str = '',       // the url encoded string derrived from the $this->data array        
                 $type = 'PAYMENT',       // Transaction type
-                $protocol_version = '2.22',      // SagePay protocol vers no
+                $protocol_version = "2.23",      // SagePay protocol vers no
                 $vendor_name = 'my_vendor_name',      // Your SagePay vendor name
                 $currency = 'gbp';       // Currency transaction is to be in. For multi-currency sites, you need to change this from a constant to a property
                 
@@ -46,7 +45,7 @@ class SagePay
         public function __construct($data, $config)
         {
 				// mod - set some config options
-				$this->type = $config["type"];
+				$this->type = $config["transaction-type"];
 				$this->vendor_name = $config["vendor-name"];
 				$this->description = $config["description"];
 				$this->currency = $config["currency"];
@@ -85,8 +84,8 @@ class SagePay
                 // set the vendorTxCode
                 $this->vendorTxCode = $data['VendorTxCode'];
                 
-                // set the required fields to pass to SagePay
-                $this->standardFields = array(
+                // set the required fields to pass to SagePay (modded - this was doing something weird before!)
+                $this->data = array_merge($this->data, array(
                         'VPSProtocol' => $this->protocol_version,
                         'TxType' => $this->type,
                         'Vendor' => $this->vendor_name,
@@ -94,7 +93,7 @@ class SagePay
                         'Amount' => $this->price,
                         'Currency' => $this->currency,
                         'Description' => $this->description
-                );
+                ));
                 
                 // Add Payment Type
                 $this->data['PaymentType'] = $this->type;
@@ -106,7 +105,8 @@ class SagePay
                 $this->data['VendorTxCode'] = $this->vendorTxCode;
                 $this->data['Description'] = $this->description;
                 $this->data['Vendor'] = $this->vendor_name;
-        }
+        
+		}
         
         
         /**
@@ -117,7 +117,7 @@ class SagePay
          **/
         private function setUrls()
         {
-                $this->url = ($this->env == 'DEVELOPMENT') ? 'https://test.sagepay.com/gateway/service/vspdirect-register.vsp' : 'https://live.sagepay.com/gateway/service/vspdirect-register.vsp';
+                $this->url = ($this->env == 'SIMULATOR') ? 'https://test.sagepay.com/Simulator/VSPDirectGateway.asp' : 'https://live.sagepay.com/gateway/service/vspdirect-register.vsp';
         }
         
         
@@ -191,7 +191,6 @@ class SagePay
                 // Set a cURL timeout of 30 seconds
                 curl_setopt($curlSession, CURLOPT_TIMEOUT,30);
                 curl_setopt($curlSession, CURLOPT_SSL_VERIFYPEER, FALSE);
-
 
                 // Send the request and convert the return value to an array
                 $response = preg_split('/$\R?^/m',curl_exec($curlSession));
@@ -290,7 +289,16 @@ class SagePay
                         $data['BillingCity'] = 'Test Town';
                         $data['BillingCountry'] = 'GB';
                         $data['BillingPostCode'] = '412';
-                        $data['Amount'] = $arr['total'];
+						
+                        $data['DeliveryFirstnames'] = 'Tester';
+                        $data['DeliverySurname'] = 'Testing';
+                        $data['DeliveryAddress1'] = '88';
+                        $data['DeliveryAddress2'] = '432 Testing Road';
+                        $data['DeliveryCity'] = 'Test Town';
+                        $data['DeliveryCountry'] = 'GB';
+                        $data['DeliveryPostCode'] = '412';						
+						
+                        $data['Amount'] = $arr['Amount'];
                 } else {
                         // this is where the VendorTxCode is set. Once it's set here, don't set it anywhere else, use this one
                         $data['VendorTxCode'] = 'prefix_' . time() . rand(0, 9999);
@@ -313,6 +321,16 @@ class SagePay
                         $data['BillingCity'] = $arr['BillingCity'];
                         $data['BillingCountry'] = $arr['BillingCountry'];
                         $data['BillingPostCode'] = $arr['BillingPostCode'];
+						
+                        $data['DeliveryFirstnames'] = $arr['DeliveryFirstnames'];
+                        $data['DeliverySurname'] = $arr['DeliverySurname'];
+                        $data['DeliveryAddress1'] = $arr['DeliveryAddress1'];
+                        $data['DeliveryAddress2'] = $arr['DeliveryAddress2'];
+                        $data['DeliveryCity'] = $arr['DeliveryCity'];
+                        $data['DeliveryCountry'] = $arr['DeliveryCountry'];
+                        $data['DeliveryPostCode'] = $arr['DeliveryPostCode'];
+						
+						
                         $data['Amount'] = $arr['Amount'];
                 }
                 

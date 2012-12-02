@@ -13,7 +13,16 @@ class TestGateway extends PaymentGateway {
 	
 	}
 	
-	public function processTransaction() {}
+	public function getRequiredFieldsArray() {
+		return array();
+	}
+	
+	public function processTransaction($transactionFieldData, $configuration) {
+	
+		print_r($transactionFieldData);
+		print_r($configuration);
+		
+	}
 	
 	public function processPaymentNotification() {}
 

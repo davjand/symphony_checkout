@@ -5,12 +5,20 @@
 	Class fieldTransaction extends Field{
 
 		private $subFields = array(
+						"payment-reference",
+						"gateway",
 						"total-amount"
 					);
 	
 		public function __construct() {
 			parent::__construct();
 			$this->_name = "Transaction";
+			
+			$this->set("mappings", 
+			"
+
+			");
+			
 		}
 	
 		public function commit(){
@@ -24,6 +32,7 @@
 			$fields = array();
 			
 			$fields['field_id'] = $id;
+			$fields['mappings'] = $this->get('mappings');
 			
 			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
 				
@@ -34,8 +43,15 @@
 		public function displaySettingsPanel(&$wrapper, $errors = null) {
 			parent::displaySettingsPanel($wrapper, $errors);	
 			
+			$label = Widget::Label(__('Data Mappings'));
+			$label->appendChild(
+				Widget::Textarea("fields[".$this->get('sortorder')."][mappings]", 15, 30, $this->get('mappings'))
+			);
+			
+			$wrapper->appendChild($label);
+			
 			$this->appendRequiredCheckbox($wrapper);
-			$this->appendShowColumnCheckbox($wrapper);	
+			$this->appendShowColumnCheckbox($wrapper);			
 		}
 	
 		public function createTable(){
@@ -74,6 +90,13 @@
 			$result = $data;
 
 			return $result;
+		}	
+	
+		public function set($field, $value){
+			if($field == 'related_field_id' && !is_array($value)){
+				$value = explode(',', $value);
+			}
+			$this->_fields[$field] = $value;
 		}	
 	
 	}

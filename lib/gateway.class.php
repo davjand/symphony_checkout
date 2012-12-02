@@ -24,10 +24,10 @@ abstract class PaymentGateway {
 	}	
 	
 	abstract public function getConfigArray();
-	
 	abstract public function getDetailsArray();
+	abstract public function getRequiredFieldsArray();
 	
-	abstract public function processTransaction($transactionFieldData);
+	abstract public function processTransaction($transactionFieldData, $configuration);
 	abstract public function processPaymentNotification();
 
 }
