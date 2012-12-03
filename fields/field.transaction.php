@@ -5,19 +5,36 @@
 	Class fieldTransaction extends Field{
 
 		private $subFields = array(
-						"payment-reference",
 						"gateway",
-						"total-amount"
+						"total-amount",
+						"returned-info"
 					);
 	
 		public function __construct() {
 			parent::__construct();
 			$this->_name = "Transaction";
 			
+			
+			// these are storable details that may be stored elsewhere in the section
+			// this are NOT a comprehensive list of what is required by the driver
 			$this->set("mappings", 
-			"
-
-			");
+			"BillingFirstnames:\r\n
+			BillingSurname:\r\n
+			BillingAddress1:\r\n
+			BillingAddress2:\r\n
+			BillingCity:\r\n
+			BillingCountry:\r\n
+			BillingPostCode:\r\n
+			DeliveryFirstnames:\r\n
+			DeliverySurname:\r\n
+			DeliveryAddress1:\r\n
+			DeliveryAddress2:\r\n	
+			DeliveryCity:\r\n
+			DeliveryCountry:\r\n
+			DeliveryPostCode:\r\n
+			DeliveryState:\r\n
+			DeliveryPhone:\r\n
+			CustomerEmail:");
 			
 		}
 	
@@ -81,7 +98,20 @@
 			else $wrapper->appendChild($label);
 			
 		}		
-	
+
+		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
+			
+			$fieldRoot = new XMLElement($this->get('element_name'));
+			
+			foreach($this->subFields as $f) {
+				$newE = new XMLElement($f, $data[$f]);
+				$fieldRoot->appendChild($newE);
+			}
+			
+			$wrapper->appendChild($fieldRoot);
+			
+		}
+		
 		public function processRawFieldData($data, &$status, $simulate = false, $entry_id = null) {
 
 			$status = self::__OK__;

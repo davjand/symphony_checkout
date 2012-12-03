@@ -79,18 +79,15 @@ class SagepayGateway extends PaymentGateway {
 			Amount
 		*/
 	
-	
 		require(dirname(__FILE__) . "./sagepay/sagepay.class.php");
 
 		$data = SagePay::formatRawData($transactionFieldData);
-		
-		print_r($transactionFieldData);
-		
+				
 		$sgpy = new SagePay($data, $configuration);
 		
 		$sgpy->execute();
-	
-		print_r($sgpy);
+		
+		return($sgpy->response);		
 	
 	}
 	

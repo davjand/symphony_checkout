@@ -19,14 +19,14 @@ class SagePay
                 $vendorTxCode = '',     // vendor transaction code. must be unqiue
                 $acsurl = '',           // used to store data for 3D Secure
                 $pareq = '',            // used to store data for 3D Secure
-                $md = '';                       // used to store data for 3D Secure
+                $md = '',                       // used to store data for 3D Secure
+                $response = array();    // response from SagePay cURL request
         private
                 $env = '',                      // environment, set according to 'ENV' site constant
                 $url = '',                      // the URL to post the cURL request to (set further down)
                 $data = array(),        // the data to post
                 $price = 0,                     // transaction amount
                 $standardFields = array(), // holds standard SagePay info (currency etc)
-                $response = array(),    // response from SagePay cURL request
                 $description = 'New order from your online store',      // Description of the order sent to SagePay
                 $curl_str = '',       // the url encoded string derrived from the $this->data array        
                 $type = 'PAYMENT',       // Transaction type
@@ -270,7 +270,7 @@ class SagePay
         {
                 $data = array();
                 // this is test card details for SagePay, if we are testing, we don't want to use live card details
-                if($arr["Testing"] == true) {
+                if($arr["test"] == true) {
                         // this is where the VendorTxCode is set. Once it's set here, don't set it anywhere else, use this one
                         $data['VendorTxCode'] = 'prefix_' . time() . rand(0, 9999);
                         $data['CardHolder'] = 'DELTA';
