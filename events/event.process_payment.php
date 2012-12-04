@@ -41,6 +41,46 @@
 			';
 		}
 
+		public static function processRawMappings($rawFieldMappings) {
+			$fieldMappings = array();
+			foreach(explode("\r\n", $rawFieldMappings) as $f) {
+				$mapParts = explode(":", $f);
+				$fieldMappings[$mapParts[0]] = $mapParts[1];
+			}	
+			return $fieldMappings;
+		}
+		
+		public static function transferMappings(&$transactionData, $requiredFields, $processedMappings, $bypassDatabase = false) {
+			foreach($requiredFields as $f) {
+				if(!isset($transactionData[$f]) && !$testing) {
+					// we weren't passed the data... let's grab it from the mappings
+					$mappedFieldName = $processedMappings[$f];
+					
+					// a hackaround for testing
+					if(!$bypassDatabase) {
+						$mappedValue = self::mappedFieldToValue($mappedFieldName, $savedSettings["general"]["attached-section"], $_POST["id"]);
+					}	
+					else {
+						$mappedValue = "ok";
+					}
+						
+					// assign the value back into the transactionData
+					$transactionData[$f] = $mappedValue;
+					
+				}
+			}	
+		}
+		
+		public static function mappedFieldToValue($mappedFieldName, $sectionId, $itemId) {
+			$query = new SymQLQuery();
+			$query->from($sectionId);
+			$query->where("system:id", $itemId);
+			$query->select($mappedFieldName);
+			
+			$mappedValue = SymQL::run($query, RETURN_ARRAY);
+			return $mappedValue;
+		}
+		
 		public function load(){
 			
 			$testing = false;
@@ -69,42 +109,17 @@
 				// get the mappings for this specific field
 				$transactionField = FieldManager::fetch($savedSettings["general"]["attached-field"], $savedSettings["general"]["attached-section"]);
 				if(is_array($transactionField)) { $transactionField = $transactionField[32]; }
-				$rawFieldMappings = $transactionField->get('mappings');
 				
-				$fieldMappings = array();
-				foreach(explode("\r\n", $rawFieldMappings) as $f) {
-					$mapParts = explode(":", $f);
-					$fieldMappings[$mapParts[0]] = $mapParts[1];
-				}
+				$rawFieldMappings = $transactionField->get('mappings');
+				$fieldMappings = self::processRawMappings($rawFieldMappings);
 				
 				// create the gateway
 				include(dirname(__FILE__) . "/../lib/gatewayfactory.class.php");
 				$gateway = PaymentGatewayFactory::createGateway($gwName);
 				
-
-				
 				// for any missing required values, transfer data using the mappings
-				foreach($gateway->getRequiredFieldsArray() as $f) {
-					if(!isset($transactionData[$f]) && !$testing) {
-						// we weren't passed the data... let's grab it from the mappings
-						$mappedFieldName = $mapParts[$f];
-						
-						// we know we have the id...
-						$query = new SymQLQuery();
-						$query->from($savedSettings["general"]["attached-section"]);
-						$query->where("system:id", $_POST["id"]);
-						$query->select($mappedFieldName);
-						
-						$mappedValue = SymQL::run($query, RETURN_ARRAY);
-							
-						// assign the value back into the transactionData
-						$transactionData[$f] = $mappedValue;
-						
-					}
-				}			
-				
-				// REMOVED field presence check - code above will assure field integrity
-						
+				self::transferMappings(&$transactionData, $gateway->getRequiredFieldsArray(), $fieldMappings);
+										
 				// post everything through the gateway
 				$transactionReturn = $gateway->processTransaction($transactionData , $savedSettings[$gwName]);
 						
