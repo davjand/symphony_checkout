@@ -93,6 +93,23 @@ class SagepayGateway extends PaymentGateway {
 	
 	public function processPaymentNotification() {}
 
+	public function runTest($configuration) {
+		
+		// ensure this is only a testing request
+		$configuration["connect-to"] = "SIMULATOR";
+	
+		require(dirname(__FILE__) . "./sagepay/sagepay.class.php");
+		$data = SagePay::formatRawData(array("Amount" => "123.45", "test" => true));
+		
+		$sgpy = new SagePay($data, $configuration);
+		
+		$sgpy->execute();
+		
+		// return the whole object so that it can be outputted
+		return($sgpy);
+	
+	}
+	
 }
 
 

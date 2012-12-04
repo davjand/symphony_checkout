@@ -30,6 +30,8 @@ abstract class PaymentGateway {
 	abstract public function processTransaction($transactionFieldData, $configuration);
 	abstract public function processPaymentNotification();
 
+	abstract public function runTest($configuration);
+	
 }
 
 ?>

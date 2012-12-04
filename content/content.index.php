@@ -27,8 +27,6 @@ class contentExtensionCheckoutIndex extends AdministrationPage
 
     }
 */
-
-
     public function build()
     {
         parent::build();
@@ -71,6 +69,13 @@ class contentExtensionCheckoutIndex extends AdministrationPage
 		
 		// Get the saved settings from the file - this will populate $savedSettings
 		include(dirname(__FILE__) . "/../config.php");
+	
+		// Link to testing
+		$linkSet = new XMLElement('fieldset');
+		$linkSet->setAttribute('class', 'settings type-file');
+		$linkSet->appendChild(new XMLElement('legend', __("Links")));
+		$linkSet->appendChild(Widget::Anchor("Checkout Testing", "./testing"));
+		$this->Form->appendChild($linkSet);
 	
 		// General settings section
 		$fieldset = new XMLElement('fieldset');
