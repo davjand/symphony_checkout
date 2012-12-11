@@ -1,11 +1,18 @@
 <?php $savedSettings = array (
+  'general' => 
+  array (
+    'gateways' => 
+    array (
+      0 => 'sagepaygateway',
+    ),
+    'attached-section' => '',
+    'attached-field' => '',
+  ),
   'SagepayGateway' => 
   array (
     'connect-to' => 'SIMULATOR',
     'description' => 'A Test Transaction',
-    'site-fqdn' => '',
     'vendor-name' => 'veodesign',
-    'encryption-password' => '',
     'currency' => 'GBP',
     'transaction-type' => 'PAYMENT',
     'partner-id' => '',
