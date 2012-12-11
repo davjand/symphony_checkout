@@ -7,7 +7,7 @@ require_once(TOOLKIT . '/class.sectionmanager.php');
 require_once(TOOLKIT . '/class.fieldmanager.php');
 require_once(TOOLKIT . '/class.entrymanager.php');
 require_once(TOOLKIT . '/class.entry.php');
-require_once(EXTENSIONS . '/extension_installer/lib/extension-data.class.php');
+//require_once(EXTENSIONS . '/extension_installer/lib/extension-data.class.php');
 
 require_once(TOOLKIT . '/class.datasource.php');
 require_once(TOOLKIT . '/class.datasourcemanager.php');
@@ -15,10 +15,10 @@ require_once(TOOLKIT . '/class.datasourcemanager.php');
 require_once(CORE . '/class.cacheable.php');
 require_once(CORE . '/class.administration.php');
 
-require_once(EXTENSIONS . '/checkout/data-sources/data.available_gateways.php');
+require_once(EXTENSIONS . '/symphony_checkout/data-sources/data.available_gateways.php');
 
 
-class contentExtensionCheckoutIndex extends AdministrationPage	
+class contentExtensionSymphony_checkoutIndex extends AdministrationPage	
 {	
 
 /*    public function __construct(&$parent)
