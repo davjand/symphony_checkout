@@ -1,6 +1,6 @@
 <?php
 
-	Class extension_checkout extends Extension {
+	Class extensionsymphony_checkout extends Extension {
 
 		public function install() {
 

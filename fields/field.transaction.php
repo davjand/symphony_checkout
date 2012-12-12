@@ -5,9 +5,11 @@
 	Class fieldTransaction extends Field{
 
 		private $subFields = array(
-						"gateway",
-						"total-amount",
-						"returned-info"
+						"gateway" => "text",
+						"total-amount" => "text",
+						"processed-ok" => "checkbox",
+						"transaction-id" => "text",
+						"returned-info" => "text"
 					);
 	
 		public function __construct() {
@@ -36,6 +38,11 @@
 			DeliveryPhone:\r\n
 			CustomerEmail:");
 			
+		}
+	
+		// do we need to define any other functions? who knows?!
+		public function canFilter() {
+			return true;
 		}
 	
 		public function commit(){
@@ -75,7 +82,7 @@
 			
 			$query = "CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (`id` int(11) unsigned NOT NULL auto_increment,`entry_id` int(11) unsigned NOT NULL,";
 			
-			foreach($this->subFields as $f) {
+			foreach($this->subFields as $f => $t) {
 				$query .= "`{$f}` varchar(255) default NULL,";
 			}
 			
@@ -90,8 +97,8 @@
 		
 			$label = Widget::Label("<b>" . $this->get('label') . "</b>");
 			
-			foreach($this->subFields as $f) {
-				$label->appendChild(Widget::Label($f, Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']['.$f.']'.$fieldnamePostfix, (strlen($data[$f]) != 0 ? $data[$f] : NULL))));
+			foreach($this->subFields as $f => $t) {
+				$label->appendChild(Widget::Label($f, Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']['.$f.']'.$fieldnamePostfix, (strlen($data[$f]) != 0 ? $data[$f] : NULL), $t)));
 			}
 
 			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
@@ -103,7 +110,7 @@
 			
 			$fieldRoot = new XMLElement($this->get('element_name'));
 			
-			foreach($this->subFields as $f) {
+			foreach($this->subFields as $f => $t) {
 				$newE = new XMLElement($f, $data[$f]);
 				$fieldRoot->appendChild($newE);
 			}

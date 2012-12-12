@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="multicom_plugin" status="unreleased" xmlns="http://symphony-cms.com/schemas/extension/1.0">
-	<name>Checkout</name>
+	<name>Symphony Checkout</name>
 	<description>Provides functionality to construct transactions and run them through payment gateways</description>
 	<url type="discuss">http://www.devjet.co.uk</url>
 	<types>
@@ -13,7 +13,7 @@
 		</author>
 	</authors>
 	<releases>
-		<release version="0.8" date="2012-11-28" min="2.3">
+		<release version="0.8.5" date="2012-11-28" min="2.3">
 			- Started
 		</release>
 	</releases>	
