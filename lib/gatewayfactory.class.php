@@ -9,7 +9,7 @@
 class PaymentGatewayFactory {
 
 	public static function includeGateways() {		
-		$includeDir = opendir( dirname(__FILE__) . "./gateways/" );
+		$includeDir = opendir( dirname(__FILE__) . "/gateways/" );
 		while( false !== ( $includeFile = readdir( $includeDir ) ) ) {
 			if( ( $includeFile != "." ) && ( $includeFile != ".." )) {
 				$iPath =  dirname(__FILE__) . "/gateways/" . $includeFile;

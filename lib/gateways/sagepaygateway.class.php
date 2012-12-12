@@ -1,5 +1,4 @@
 <?php
-
 include_once(dirname(__FILE__) . "/../gateway.class.php");
 
 class SagepayGateway extends PaymentGateway {
@@ -79,7 +78,7 @@ class SagepayGateway extends PaymentGateway {
 			Amount
 		*/
 	
-		require(dirname(__FILE__) . "./sagepay/sagepay.class.php");
+		require(dirname(__FILE__) . "/sagepay/sagepay.class.php");
 
 		$data = SagePay::formatRawData($transactionFieldData);
 				
@@ -98,7 +97,7 @@ class SagepayGateway extends PaymentGateway {
 		// ensure this is only a testing request
 		$configuration["connect-to"] = "SIMULATOR";
 	
-		require(dirname(__FILE__) . "./sagepay/sagepay.class.php");
+		require(dirname(__FILE__) . "/sagepay/sagepay.class.php");
 		$data = SagePay::formatRawData(array("Amount" => "123.45", "test" => true));
 		
 		$sgpy = new SagePay($data, $configuration);

@@ -20,9 +20,9 @@
 			// these are storable details that may be stored elsewhere in the section
 			// this are NOT a comprehensive list of what is required by the driver
 			$this->set("mappings", 
-			"BillingFirstnames:\r\n
-			BillingSurname:\r\n
-			BillingAddress1:\r\n
+			"BillingFirstnames:\n
+			BillingSurname:\n
+			BillingAddress1:\n
 			BillingAddress2:\r\n
 			BillingCity:\r\n
 			BillingCountry:\r\n
