@@ -19,24 +19,7 @@
 			
 			// these are storable details that may be stored elsewhere in the section
 			// this are NOT a comprehensive list of what is required by the driver
-			$this->set("mappings", 
-			"BillingFirstnames:\n
-			BillingSurname:\n
-			BillingAddress1:\n
-			BillingAddress2:\r\n
-			BillingCity:\r\n
-			BillingCountry:\r\n
-			BillingPostCode:\r\n
-			DeliveryFirstnames:\r\n
-			DeliverySurname:\r\n
-			DeliveryAddress1:\r\n
-			DeliveryAddress2:\r\n	
-			DeliveryCity:\r\n
-			DeliveryCountry:\r\n
-			DeliveryPostCode:\r\n
-			DeliveryState:\r\n
-			DeliveryPhone:\r\n
-			CustomerEmail:");
+			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:");
 			
 		}
 	
@@ -56,8 +39,15 @@
 			$fields = array();
 			
 			$fields['field_id'] = $id;
-			$fields['mappings'] = $this->get('mappings');
+		
+			$useMappings = "";
+			foreach($this->get('mappings') as $k => $v) {
+				$useMappings .= $k . ":" . $v . "||";
+			}
+			$useMappings = substr($useMappings, 0, -2);
 			
+			$fields['mappings'] = $useMappings;
+			print_r($this->get('mappings'));
 			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
 				
 			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
@@ -67,15 +57,58 @@
 		public function displaySettingsPanel(&$wrapper, $errors = null) {
 			parent::displaySettingsPanel($wrapper, $errors);	
 			
-			$label = Widget::Label(__('Data Mappings'));
-			$label->appendChild(
-				Widget::Textarea("fields[".$this->get('sortorder')."][mappings]", 15, 30, $this->get('mappings'))
-			);
+			$group = new XMLElement('div');
+			$group->setAttribute("class", "two columns");
 			
-			$wrapper->appendChild($label);
+			$fieldset = new XMLElement('fieldset');
 			
+			$usingOptions = $this->__getFieldSelectOptions();
+			
+			foreach(explode("||", $this->get("mappings")) as $m) {
+				$subM = explode(":", $m);
+				$selectedOptions = $this->__getListWithSelectedOption($usingOptions, $subM[1]);
+				$input = Widget::Select("fields[".$this->get('sortorder')."][mappings][".$subM[0]."]", $selectedOptions);
+				$label = Widget::Label($subM[0], $input, "label", "", array("class" => "column"));			
+				$fieldset->appendChild($label);
+			}
+		
+			$group->appendChild($fieldset);
+			$wrapper->appendChild($group);
+			//$wrapper->appendChild($fieldset);
+						
 			$this->appendRequiredCheckbox($wrapper);
 			$this->appendShowColumnCheckbox($wrapper);			
+		}
+		
+		private function __getFieldSelectOptions() {
+			$fields = FieldManager::fetch(NULL, Administration::instance()->Page->_context[1], 'ASC', 'sortorder', NULL, NULL);
+			$options = array(
+				array('', false, __('None'), ''),
+			);
+			$attributes = array(
+				array()
+			);
+			if(is_array($fields) && !empty($fields)) {
+				foreach($fields as $field) {
+					$options[] = array($field->get('label'), 0);
+				}
+			};		
+			return $options;		
+		}
+		
+		private function __getListWithSelectedOption($options, $selectedValue) {
+			// loop through the options array and select the specified value.
+			// modularising the code like this allows __getFieldSelectOptions() to be
+			// called only once but use many times with different selected options
+		
+			for($i=0;$i<count($options);$i++) {
+				if($options[$i][0] == $selectedValue) {
+					$options[$i][1] = 1;
+				}
+			}
+					
+			return $options;
+				
 		}
 	
 		public function createTable(){
@@ -95,17 +128,41 @@
 		
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 		
-			$label = Widget::Label("<b>" . $this->get('label') . "</b>");
+			$title = Widget::Label($this->get('label'));
+			$wrapper->appendChild($title);
+		
+			$container = new XMLElement("div");
+			$container->setAttribute("class", "");
+		
+			$table = new XMLElement("table");	
+			foreach($this->subFields as $f => $t) {
+				$tr = new XMLElement("tr");
+				$tr->appendChild(new XMLElement("td", $this->__prettifyValue($f)));
+				$tr->appendChild(new XMLElement("td", $data[$f]));
+				$table->appendChild($tr);
+			}
+			$container->appendChild($table);
 			
+			$wrapper->appendChild($container);
+		/*
 			foreach($this->subFields as $f => $t) {
 				$label->appendChild(Widget::Label($f, Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']['.$f.']'.$fieldnamePostfix, (strlen($data[$f]) != 0 ? $data[$f] : NULL), $t)));
 			}
 
 			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
 			else $wrapper->appendChild($label);
-			
+			*/
 		}		
 
+		private function __prettifyValue($value) {
+			
+			$value = str_replace("-", " ", $value);
+			$value = ucwords($value);
+			
+			return $value;
+		
+		}
+		
 		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
 			
 			$fieldRoot = new XMLElement($this->get('element_name'));
