@@ -87,7 +87,7 @@ class SagepayGateway extends PaymentGateway {
 		}
 	
 		$response = $this->doPost($url, $postData);
-
+		
 		// TODO: strip out the fields that we need to
 		return array(
 				"status" => $response["Status"], 

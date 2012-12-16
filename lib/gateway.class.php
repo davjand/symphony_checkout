@@ -66,7 +66,15 @@ abstract class PaymentGateway {
 
 	protected function generateUniqueTxCode($uniqueData) {
 		$strOutput = mt_rand();
-		foreach($uniqueData as $k => $v) {$strOutput .= md5($v);}
+		foreach($uniqueData as $k => $v) {
+			// beware!! because of postdata $v could be an object... so lets find out and deal with it.
+			if(is_string($v)) {
+				$strOutput .= md5($v);
+			}
+			else {
+				$strOutput .= md5(print_r($v, true));
+			}
+		}
 		$strOutput = "TX-" . date("d-m-Y") . "-" . substr(md5($strOutput), 0, 15);
 		return $strOutput;
 	}

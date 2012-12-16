@@ -52,7 +52,7 @@
 			
 			// get the information related to this transaction id - a pretty involved process!...
 			$storedData = null;
-			$usingSessionId = 0;
+			$fieldName = "";
 			// first get all the fields
 			$field_list = FieldManager::fetch();
 			foreach($field_list as $f) {
@@ -79,6 +79,8 @@
 							if($fVal["local-transaction-id"] == $transactionId) {
 								// grab it!!
 								$storedData = $fVal;
+								// save the field name
+								$fieldName = $f->get('element_name');
 								// set the target section for when we save everything
 								self::$targetSection = $f->get('parent_section');
 							}
@@ -92,11 +94,11 @@
 			$gatewayResponse = $gateway->processPaymentNotification($_POST, $storedData, $savedSettings[$savedSettings["general"]["gateway"]]);
 			
 			// save the result in the field
-			$_POST["fields"][$transactionField->_name]["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
+			$_POST["fields"][$fieldName]["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
 			include(TOOLKIT . '/events/event.section.php');			
 			
 			// ? should we echo it or use it as XML, echo for now.
-			echo($gatewayResponse["return-value"]);
+			return (new XMLElement(self::ROOTELEMENT, "HELLO"));
 			
 		}
 	}

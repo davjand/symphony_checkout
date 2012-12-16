@@ -118,7 +118,8 @@ class contentExtensionSymphony_checkoutIndex extends AdministrationPage
 			$fieldset->appendChild(new XMLElement('legend', __($g)));
 			foreach($c as $item) {
 				$label = Widget::Label($item);
-				$label->appendChild(Widget::Input("settings[{$g}][{$item}]", $savedSettings[$g][$item]));
+				$lowerg = strtolower($g);
+				$label->appendChild(Widget::Input("settings[{$lowerg}][{$item}]", $savedSettings[$lowerg][$item]));
 				$fieldset->appendChild($label);
 			}			
 			$this->Form->appendChild($fieldset);

@@ -22,7 +22,7 @@
 			
 			// these are storable details that may be stored elsewhere in the section
 			// this are NOT a comprehensive list of what is required by the driver
-			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:");
+			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:||Description:");
 			
 		}
 	
@@ -50,7 +50,6 @@
 			$useMappings = substr($useMappings, 0, -2);
 			
 			$fields['mappings'] = $useMappings;
-			print_r($this->get('mappings'));
 			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
 				
 			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
@@ -93,7 +92,7 @@
 			);
 			if(is_array($fields) && !empty($fields)) {
 				foreach($fields as $field) {
-					$options[] = array($field->get('label'), 0);
+					$options[] = array($field->get('element_name'), 0, $field->get('label'));
 				}
 			};		
 			return $options;		

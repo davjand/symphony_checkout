@@ -3,7 +3,7 @@
   array (
     'gateway' => 'sagepaygateway',
   ),
-  'SagepayGateway' => 
+  'sagepaygateway' => 
   array (
     'connect-to' => 'SIMULATOR',
     'description' => 'A Test Transaction',
@@ -13,7 +13,7 @@
     'notification-url' => 'https://www.google.com/test.php',
     'return-url' => '',
   ),
-  'TestGateway' => 
+  'testgateway' => 
   array (
     'test-setting-1' => '',
     'test-setting-2' => '',

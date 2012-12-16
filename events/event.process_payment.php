@@ -43,27 +43,30 @@
 
 		public static function processRawMappings($rawFieldMappings) {
 			$fieldMappings = array();
-			foreach(explode("\r\n", $rawFieldMappings) as $f) {
+			foreach(explode("||", $rawFieldMappings) as $f) {
 				$mapParts = explode(":", $f);
 				$fieldMappings[$mapParts[0]] = $mapParts[1];
 			}	
 			return $fieldMappings;
 		}
 		
-		public static function transferMappings(&$transactionData, $requiredFields, $processedMappings, $bypassDatabase = false) {
+		public static function transferMappings(&$transactionData, $requiredFields, $processedMappings, $section_id) {
 			foreach($requiredFields as $f) {
-				if(!isset($transactionData[$f]) && !$testing) {
+				if(!isset($transactionData[$f])) {
 					// we weren't passed the data... let's grab it from the mappings
 					$mappedFieldName = $processedMappings[$f];
 					
-					// a hackaround for testing
-					if(!$bypassDatabase) {
-						$mappedValue = self::mappedFieldToValue($mappedFieldName, $savedSettings["general"]["attached-section"], $_POST["id"]);
-					}	
-					else {
-						$mappedValue = "ok";
+					$mappedValue = "";
+					
+					// the symql can fail massively if we don't have a mapping for a required field - since there
+					// is no way of enforcing this we should return an empty string if something weird happens and
+					// just let the rest of the code bumble along (I suspect that the failure will then happen at the
+					// request level but we have better handling there).
+					try {
+						$mappedValue = self::mappedFieldToValue($mappedFieldName, $section_id, $_POST["id"]);
 					}
-						
+					catch(Exception $e) {}
+					
 					// assign the value back into the transactionData
 					$transactionData[$f] = $mappedValue;
 					
@@ -76,8 +79,14 @@
 			$query->from($sectionId);
 			$query->where("system:id", $itemId);
 			$query->select($mappedFieldName);
+			$entriesList = SymQL::run($query, SymQL::RETURN_ENTRY_OBJECTS);
+			$mappedValue = null;
+			foreach($entriesList["entries"] as $e) {
+				foreach($e->getData() as $fVal) {
+					$mappedValue = $fVal["value"];
+				}
+			}
 			
-			$mappedValue = SymQL::run($query, RETURN_ARRAY);
 			return $mappedValue;
 		}
 		
@@ -124,22 +133,26 @@
 				$gateway = PaymentGatewayFactory::createGateway($gwName);
 				
 				// for any missing required values, transfer data using the mappings
-				self::transferMappings(&$transactionData, $gateway->getRequiredFieldsArray(), $fieldMappings);
+				self::transferMappings(&$transactionData, $gateway->getRequiredFieldsArray(), $fieldMappings, $section_id);
 										
 				// post everything through the gateway
-				$gatewayResponse = $gateway->processTransaction($transactionData , $savedSettings[$savedSettings["general"]["gateway"]]);
+				$gatewayResponse = $gateway->processTransaction($transactionData, $savedSettings[$savedSettings["general"]["gateway"]]);
 				
 				// save posted information into the section - default event behavior
 				// creates $result
-				$_POST["fields"][$transactionField->_name]["gateway"] = $savedSettings["general"]["gateway"];
-				$_POST["fields"][$transactionField->_name]["total-amount"] = $_POST["fields"]["Amount"];
-				$_POST["fields"][$transactionField->_name]["accepted-ok"] = ($gatewayResponse["status"] == "OK" ? "on" : "off");
-				$_POST["fields"][$transactionField->_name]["security-key"] = $gatewayResponse["security-key"];
-				$_POST["fields"][$transactionField->_name]["local-transaction-id"] = $gatewayResponse["local-txid"];
-				$_POST["fields"][$transactionField->_name]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
+				$_POST["fields"][$transactionField->get('element_name')]["gateway"] = $savedSettings["general"]["gateway"];
+				$_POST["fields"][$transactionField->get('element_name')]["total-amount"] = $_POST["fields"]["Amount"];
+				$_POST["fields"][$transactionField->get('element_name')]["accepted-ok"] = ($gatewayResponse["status"] == "OK" ? "on" : "off");
+				$_POST["fields"][$transactionField->get('element_name')]["security-key"] = $gatewayResponse["security-key"];
+				$_POST["fields"][$transactionField->get('element_name')]["local-transaction-id"] = $gatewayResponse["local-txid"];
+				$_POST["fields"][$transactionField->get('element_name')]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
+				$_POST["fields"][$transactionField->get('element_name')]["returned-info"] = $gatewayResponse["detail"];
+				
 				
 				self::$targetSection = $section_id;
 				include(TOOLKIT . '/events/event.section.php');
+				
+				redirect($gatewayResponse["redirect-url"]);
 				
 			}
 					
