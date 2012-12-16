@@ -145,8 +145,6 @@ class SagepayGateway extends PaymentGateway {
 		}
 	
 	}
-
-	
 	
 	public function runTest($configuration) {
 		

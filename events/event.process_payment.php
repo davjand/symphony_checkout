@@ -111,7 +111,7 @@
 				$field_list = FieldManager::fetch(null, $section_id);
 				$transactionField = null;
 				foreach($field_list as $f) {
-					if($f->_handle = "transaction") {
+					if($f->_handle == "transaction") {
 						$transactionField = $f;
 					}	
 				}				
@@ -127,23 +127,19 @@
 				self::transferMappings(&$transactionData, $gateway->getRequiredFieldsArray(), $fieldMappings);
 										
 				// post everything through the gateway
-				$transactionReturn = $gateway->processTransaction($transactionData , $savedSettings[$gwName]);
-						
-				print_r($transactionField);
-						
+				$gatewayResponse = $gateway->processTransaction($transactionData , $savedSettings[$savedSettings["general"]["gateway"]]);
+				
 				// save posted information into the section - default event behavior
 				// creates $result
-				$_POST["fields"][$transactionField->_name]["gateway"] = $gwName;
+				$_POST["fields"][$transactionField->_name]["gateway"] = $savedSettings["general"]["gateway"];
 				$_POST["fields"][$transactionField->_name]["total-amount"] = $_POST["fields"]["Amount"];
-				$_POST["fields"][$transactionField->_name]["returned-info"] = print_r($transactionReturn, true);
+				$_POST["fields"][$transactionField->_name]["accepted-ok"] = ($gatewayResponse["status"] == "OK" ? "on" : "off");
+				$_POST["fields"][$transactionField->_name]["security-key"] = $gatewayResponse["security-key"];
+				$_POST["fields"][$transactionField->_name]["local-transaction-id"] = $gatewayResponse["local-txid"];
+				$_POST["fields"][$transactionField->_name]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
 				
-				self::$targetSection = $savedSettings["general"]["attached-section"];
-				if(!$testing) {
-					include(TOOLKIT . '/events/event.section.php');
-				}
-				else {
-					print_r($_POST);
-				}
+				self::$targetSection = $section_id;
+				include(TOOLKIT . '/events/event.section.php');
 				
 			}
 					

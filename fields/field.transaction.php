@@ -7,8 +7,11 @@
 		private $subFields = array(
 						"gateway" => "text",
 						"total-amount" => "text",
+						"accepted-ok" => "checkbox",
 						"processed-ok" => "checkbox",
-						"transaction-id" => "text",
+						"local-transaction-id" => "text",						
+						"remote-transaction-id" => "text",
+						"security-key" => "text",
 						"returned-info" => "text"
 					);
 	
@@ -144,7 +147,10 @@
 			$container->appendChild($table);
 			
 			$wrapper->appendChild($container);
-		/*
+			
+			
+			/* ALLOWS EDITING FOR DEBUGGING! 
+			$label = Widget::Label($this->get('label'));
 			foreach($this->subFields as $f => $t) {
 				$label->appendChild(Widget::Label($f, Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']['.$f.']'.$fieldnamePostfix, (strlen($data[$f]) != 0 ? $data[$f] : NULL), $t)));
 			}
