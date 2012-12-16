@@ -24,7 +24,9 @@ class TestGateway extends PaymentGateway {
 		
 	}
 	
-	public function processPaymentNotification() {}
+	public function processPaymentNotification($returnData, $storedData, $configuration) {}
+	
+	public function extractLocalTxId($returnData) {}
 	
 	public function runTest($configuration) {
 	

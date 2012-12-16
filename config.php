@@ -1,12 +1,7 @@
 <?php $savedSettings = array (
   'general' => 
   array (
-    'gateways' => 
-    array (
-      0 => 'sagepaygateway',
-    ),
-    'attached-section' => '',
-    'attached-field' => '',
+    'gateway' => 'sagepaygateway',
   ),
   'SagepayGateway' => 
   array (
@@ -15,7 +10,8 @@
     'vendor-name' => 'veodesign',
     'currency' => 'GBP',
     'transaction-type' => 'PAYMENT',
-    'partner-id' => '',
+    'notification-url' => 'https://www.google.com/test.php',
+    'return-url' => '',
   ),
   'TestGateway' => 
   array (

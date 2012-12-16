@@ -81,19 +81,19 @@ class contentExtensionSymphony_checkoutIndex extends AdministrationPage
 		$fieldset = new XMLElement('fieldset');
 		$fieldset->setAttribute('class', 'settings type-file');
 		$fieldset->appendChild(new XMLElement('legend', __("General")));
-		$label = Widget::Label("Active Gateways");
+		$label = Widget::Label("Active Gateway");
 		$activeOptions = array();
 		$gatewayList = PaymentGatewayFactory::getGatewayList();	
 		foreach($gatewayList as $g) {
 			$isItemSelected = false;
-			if(is_array($savedSettings["general"]["gateways"])) {
-				if(in_array(strtolower($g), $savedSettings["general"]["gateways"])) {
+			if($savedSettings["general"]["gateway"]) {
+				if(strtolower($g) == $savedSettings["general"]["gateway"]) {
 					$isItemSelected = true;
 				}
 			}
 			$activeOptions[] = array(strtolower($g), $isItemSelected, $g);
 		}
-		$label->appendChild(Widget::Select("settings[general][gateways][]", $activeOptions, array("multiple" => "multiple")));	
+		$label->appendChild(Widget::Select("settings[general][gateway]", $activeOptions));	
 		$fieldset->appendChild($label);
 
 		$this->Form->appendChild($fieldset);
