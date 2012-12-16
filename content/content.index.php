@@ -95,16 +95,7 @@ class contentExtensionSymphony_checkoutIndex extends AdministrationPage
 		}
 		$label->appendChild(Widget::Select("settings[general][gateways][]", $activeOptions, array("multiple" => "multiple")));	
 		$fieldset->appendChild($label);
-		
-		$label2 = Widget::Label("Attached Section Number");
-		$label2->appendChild(Widget::Input("settings[general][attached-section]", $savedSettings["general"]["attached"]));
-		$fieldset->appendChild($label2);
-		
-		$label3 = Widget::Label("Attached Field Number");
-		$label3->appendChild(Widget::Input("settings[general][attached-field]", $savedSettings["general"]["attached"]));
-		$fieldset->appendChild($label3);
-				
-		
+
 		$this->Form->appendChild($fieldset);
 
 		

@@ -105,10 +105,16 @@
 				
 				// put all the posted values in the transactiondata array
 				$transactionData = array_merge($transactionData, $_POST["fields"]);
-				
-				// get the mappings for this specific field
-				$transactionField = FieldManager::fetch($savedSettings["general"]["attached-field"], $savedSettings["general"]["attached-section"]);
-				if(is_array($transactionField)) { $transactionField = $transactionField[32]; }
+
+				// resolve the transaction field from the entry id
+				$section_id = EntryManager::fetchEntrySectionID($_POST["id"]);
+				$field_list = FieldManager::fetch(null, $section_id);
+				$transactionField = null;
+				foreach($field_list as $f) {
+					if($f->_handle = "transaction") {
+						$transactionField = $f;
+					}	
+				}				
 				
 				$rawFieldMappings = $transactionField->get('mappings');
 				$fieldMappings = self::processRawMappings($rawFieldMappings);
