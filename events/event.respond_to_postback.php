@@ -96,14 +96,13 @@
 			$gatewayResponse = $gateway->processPaymentNotification($_POST, $storedData, $savedSettings[$savedSettings["general"]["gateway"]]);
 			
 			// save the result in the field
-			$_POST["fields"][$fieldName]["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
-			//include(TOOLKIT . '/events/event.section.php');			
+			$storedData["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
+			$_POST["fields"][$fieldName] = $storedData;
+			include(TOOLKIT . '/events/event.section.php');			
 			
 			// ? should we echo it or use it as XML, echo for now.
 			echo($gatewayResponse["return-value"]);
 			die();
-			//return (new XMLElement(self::ROOTELEMENT,));
-			//return (new XMLElement(self::ROOTELEMENT, print_r($_POST, true)));
 			
 		}
 	}

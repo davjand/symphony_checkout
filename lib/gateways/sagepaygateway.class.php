@@ -104,13 +104,69 @@ class SagepayGateway extends PaymentGateway {
 	public function extractLocalTxId($returnData) {
 		return $returnData["VendorTxCode"];
 	}
+
+	// Filters unwanted characters out of an input string.  Useful for tidying up FORM field inputs
+	private function __cleanInput($strRawText,$strType)
+	{
+
+		if ($strType=="Number") {
+			$strClean="0123456789.";
+			$bolHighOrder=false;
+		}
+		else if ($strType=="VendorTxCode") {
+			$strClean="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.";
+			$bolHighOrder=false;
+		}
+		else {
+			$strClean=" ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,'/{}@():?-_&£$=%~<>*+\"";
+			$bolHighOrder=true;
+		}
+		
+		$strCleanedText="";
+		$iCharPos = 0;
+			
+		do
+		{
+			// Only include valid characters
+			$chrThisChar=substr($strRawText,$iCharPos,1);
+				
+			if (strspn($chrThisChar,$strClean,0,strlen($strClean))>0) { 
+				$strCleanedText=$strCleanedText . $chrThisChar;
+			}
+			else if ($bolHighOrder==true) {
+					// Fix to allow accented characters and most high order bit chars which are harmless 
+					if (bin2hex($chrThisChar)>=191) {
+						$strCleanedText=$strCleanedText . $chrThisChar;
+					}
+				}
+				
+			$iCharPos=$iCharPos+1;
+			}
+		while ($iCharPos<strlen($strRawText));
+			
+		$cleanInput = ltrim($strCleanedText);
+		return $cleanInput;
+
+	}
 	
 	public function processPaymentNotification($returnData, $storedData, $configuration) {
-
+		
+		
+		// clean everything - can affect the md5
+		foreach($returnData as $k => $v) {
+			$returnData[$k] = $this->__cleanInput($v, "Text");
+		}	
+		foreach($storedData as $k => $v) {
+			$storedData[$k] = $this->__cleanInput($v, "Text");
+		}	
+		foreach($configuration as $k => $v) {
+			$configuration[$k] = $this->__cleanInput($v, "Text");
+		}	
+	
 		//check signature first!
 		$checkStr = "";
 		$checkStr .= $returnData["VPSTxId"];
-		$checkStr .= $storedData["VendorTxCode"];
+		$checkStr .= $returnData["VendorTxCode"];
 		$checkStr .= $returnData["Status"];
 		$checkStr .= $returnData["TxAuthNo"];
 		$checkStr .= $configuration["vendor-name"];
@@ -127,13 +183,18 @@ class SagepayGateway extends PaymentGateway {
 		$checkStr .= $returnData["CardType"];
 		$checkStr .= $returnData["Last4Digits"];
 
-		$eoln = chr(13) . chr(10);
-		
 		if(md5($checkStr) == strtolower($returnData["VPSSignature"])) {
 			
+			// we need to acknowledge a failure, but return a failed status
+			$status = "failed";
+			if($returnData["Status"] == "OK") {
+				$status = "completed";
+			}
+			
+			
 			return array(
-				"return-value" => "Status=OK{$eoln}RedirectURL=" . $configuration["return-url"] . "{$eoln}StatusDetail=Notification received successfully",
-				"status" => "completed"
+				"return-value" => "Status=OK\r\nRedirectURL=" . $configuration["return-url"] . "\r\nStatusDetail=Notification received successfully",
+				"status" => $status
 				);
 				
 		}
@@ -141,7 +202,7 @@ class SagepayGateway extends PaymentGateway {
 	
 			return array(
 				"return-value" => "Status=INVALID\r\nRedirectURL=" . $configuration["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
-				"status" => "completed"
+				"status" => "failed"
 				);	
 	
 		}
