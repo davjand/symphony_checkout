@@ -110,7 +110,7 @@ class SagepayGateway extends PaymentGateway {
 		//check signature first!
 		$checkStr = "";
 		$checkStr .= $returnData["VPSTxId"];
-		$checkStr .= $storedData["local-txid"];
+		$checkStr .= $storedData["VendorTxCode"];
 		$checkStr .= $returnData["Status"];
 		$checkStr .= $returnData["TxAuthNo"];
 		$checkStr .= $configuration["vendor-name"];
@@ -127,10 +127,12 @@ class SagepayGateway extends PaymentGateway {
 		$checkStr .= $returnData["CardType"];
 		$checkStr .= $returnData["Last4Digits"];
 
+		$eoln = chr(13) . chr(10);
+		
 		if(md5($checkStr) == strtolower($returnData["VPSSignature"])) {
 			
 			return array(
-				"return-value" => "Status=OK\r\nRedirectURL=" . $configuration["return-url"] . "\r\nStatusDetail=Notification received successfully.",
+				"return-value" => "Status=OK{$eoln}RedirectURL=" . $configuration["return-url"] . "{$eoln}StatusDetail=Notification received successfully",
 				"status" => "completed"
 				);
 				
@@ -138,7 +140,7 @@ class SagepayGateway extends PaymentGateway {
 		else {
 	
 			return array(
-				"return-value" => "Status=INVALID\r\nRedirectURL=" . $configuration["return-url"] . "\r\nStatusDetail=VPSSignature was incorrect - " . md5($checkStr) . " computed, " . $returnData["VPSSignature"] . " expected.",
+				"return-value" => "Status=INVALID\r\nRedirectURL=" . $configuration["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
 				"status" => "completed"
 				);	
 	

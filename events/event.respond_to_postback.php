@@ -79,6 +79,8 @@
 							if($fVal["local-transaction-id"] == $transactionId) {
 								// grab it!!
 								$storedData = $fVal;
+								// save the entry id
+								$_POST["id"] = $e->get('id');
 								// save the field name
 								$fieldName = $f->get('element_name');
 								// set the target section for when we save everything
@@ -95,10 +97,13 @@
 			
 			// save the result in the field
 			$_POST["fields"][$fieldName]["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
-			include(TOOLKIT . '/events/event.section.php');			
+			//include(TOOLKIT . '/events/event.section.php');			
 			
 			// ? should we echo it or use it as XML, echo for now.
-			return (new XMLElement(self::ROOTELEMENT, "HELLO"));
+			echo($gatewayResponse["return-value"]);
+			die();
+			//return (new XMLElement(self::ROOTELEMENT,));
+			//return (new XMLElement(self::ROOTELEMENT, print_r($_POST, true)));
 			
 		}
 	}

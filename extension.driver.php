@@ -33,45 +33,26 @@
 			}
 			return false;		
 		}
-/*
+		
+		public function modifyHeaders($page) {
+			// Our postback needs a text/plain content type. This is a pain to arrange in 
+			// Symphony apart from in a delegate like this. We detect the respond_to_postback
+			// event loaded in the current page and then set the type accordingly.
+			$pageData = Frontend::Page()->pageData();
+			$loadedEvents = explode(",",$pageData["events"]);
+			if(in_array("respond_to_postback", $loadedEvents)) {
+				Frontend::Page()->addHeaderToPage("Content-Type", "text/plain; charset=UTF-8");
+			}
+		}
+		
 		public function getSubscribedDelegates(){
 			return array(
 				array(
-					'page' => '/system/preferences/',
-					'delegate' => 'AddCustomPreferenceFieldsets',
-					'callback' => 'appendPreferences'
-				),
-				array(
-					'page' => '/system/preferences/',
-					'delegate' => 'Save',
-					'callback' => '__SavePreferences'
-				),
-				array(
-					'page' => '/system/preferences/',
-					'delegate' => 'CustomActions',
-					'callback' => '__toggleMaintenanceMode'
-				),
-				array(
-					'page' => '/backend/',
-					'delegate' => 'AppendPageAlert',
-					'callback' => '__appendAlert'
-				),
-				array(
-					'page' => '/blueprints/pages/',
-					'delegate' => 'AppendPageContent',
-					'callback' => '__appendType'
-				),
-				array(
 					'page' => '/frontend/',
-					'delegate' => 'FrontendPrePageResolve',
-					'callback' => '__checkForMaintenanceMode'
-				),
-				array(
-					'page' => '/frontend/',
-					'delegate' => 'FrontendParamsResolve',
-					'callback' => '__addParam'
+					'delegate' => 'FrontendPreRenderHeaders',
+					'callback' => 'modifyHeaders'
 				)
 			);
 		}
-*/
+
 	}
