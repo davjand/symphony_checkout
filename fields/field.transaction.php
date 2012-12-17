@@ -28,7 +28,7 @@
 	
 		// do we need to define any other functions? who knows?!
 		public function canFilter() {
-			return true;
+			return false;
 		}
 	
 		public function commit(){
@@ -81,7 +81,7 @@
 			$this->appendRequiredCheckbox($wrapper);
 			$this->appendShowColumnCheckbox($wrapper);			
 		}
-		
+				
 		private function __getFieldSelectOptions() {
 			$fields = FieldManager::fetch(NULL, Administration::instance()->Page->_context[1], 'ASC', 'sortorder', NULL, NULL);
 			$options = array(
@@ -190,6 +190,42 @@
 
 			return $result;
 		}	
+	
+		function displayDatasourceFilterPanel(&$wrapper, $data=null, $errors=null, $fieldnamePrefix=null, $fieldnamePostfix=null) {
+			parent::displayDatasourceFilterPanel($wrapper, $data, $errors, $fieldnamePrefix, $fieldnamePostfix);
+
+			$text = new XMLElement('p', __("Use different subfield prefixes for different filter options (e.g. 'security-key|hello' to filter where the security key = 'hello'."), array('class' => 'help') );
+			$wrapper->appendChild($text);
+		}	
+		
+		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false) {
+
+			// Current field id
+			$field_id = $this->get('id');
+
+			// ONLY SIMPLE AND FILTERING FOR NOW
+			
+			// Filters connected with AND
+			if($andOperation) {
+				$op = '=';
+				if(preg_match('/^not:\s*/i', $data[0], $m)) {
+					$data[0] = str_replace($m[0], '', $data[0]);
+					$op = '!=';
+				}
+
+				foreach($data as $value) {
+					$this->_key++;
+					$joins .= " LEFT JOIN `tbl_entries_data_{$field_id}` AS `t{$field_id}_{$this->_key}` ON (`e`.`id` = `t{$field_id}_{$this->_key}`.entry_id) ";
+					// the where clause is where our filtering actually happens
+					$filterParts = explode("|", $value);
+					$where .= " AND `t{$field_id}_{$this->_key}`.{$filterParts[0]} {$op} '{$filterParts[1]}' ";
+				}
+			}
+			
+			return true;
+			
+		}		
+		
 	
 		public function set($field, $value){
 			if($field == 'related_field_id' && !is_array($value)){
