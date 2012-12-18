@@ -52,7 +52,7 @@
 			
 			// get the information related to this transaction id - a pretty involved process!...
 			$storedData = null;
-			$fieldName = "";
+			$theField = null;
 			// first get all the fields
 			$field_list = FieldManager::fetch();
 			foreach($field_list as $f) {
@@ -82,7 +82,7 @@
 								// save the entry id
 								$_POST["id"] = $e->get('id');
 								// save the field name
-								$fieldName = $f->get('element_name');
+								$theField = $f;
 								// set the target section for when we save everything
 								self::$targetSection = $f->get('parent_section');
 							}
@@ -97,7 +97,20 @@
 			
 			// save the result in the field
 			$storedData["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
-			$_POST["fields"][$fieldName] = $storedData;
+			$_POST["fields"][$theField->get('element_name')] = $storedData;
+			
+			// save the result in the mappings
+			$mappedCheckboxName = "";
+			$mappings = $theField->get('mappings');
+			$aMappings = explode("||", $mappings);
+			foreach($aMappings as $m) {
+				$mParts = explode(":", $m);
+				if($mParts[0] == "PaymentCompletedCheckbox") {
+					$mappedCheckboxName = $mParts[1];
+				}
+			}
+			$_POST["fields"][$mappedCheckboxName] = $storedData["processed-ok"];
+			
 			include(TOOLKIT . '/events/event.section.php');			
 			
 			// ? should we echo it or use it as XML, echo for now.

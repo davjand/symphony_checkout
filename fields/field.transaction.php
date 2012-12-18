@@ -22,13 +22,38 @@
 			
 			// these are storable details that may be stored elsewhere in the section
 			// this are NOT a comprehensive list of what is required by the driver
-			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:||Description:");
+			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:||Description:||PaymentCompletedCheckbox:");
 			
 		}
-	
-		// do we need to define any other functions? who knows?!
+
 		public function canFilter() {
 			return false;
+		}
+
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null) {
+			$max_length = Symphony::Configuration()->get('cell_truncation_length', 'symphony');
+			$max_length = ($max_length ? $max_length : 75);	
+
+			// only this line is modified from the default
+			$value = strip_tags($data['local-transaction-id']);
+
+			if(function_exists('mb_substr') && function_exists('mb_strlen')) {
+				$value = (mb_strlen($value, 'utf-8') <= $max_length ? $value : mb_substr($value, 0, $max_length, 'utf-8') . '…');
+			}
+			else {
+				$value = (strlen($value) <= $max_length ? $value : substr($value, 0, $max_length) . '…');
+			}
+
+			if (strlen($value) == 0) $value = __('None');
+
+			if ($link) {
+				$link->setValue($value);
+
+				return $link->generate();
+			}
+
+			return $value;
+			
 		}
 	
 		public function commit(){
