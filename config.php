@@ -10,8 +10,8 @@
     'vendor-name' => 'veodesign',
     'currency' => 'GBP',
     'transaction-type' => 'PAYMENT',
-    'notification-url' => 'https://www.google.com/test.php',
-    'return-url' => '',
+    'notification-url' => '/gateway-ipn',
+    'return-url' => '/gateway-ipn',
   ),
   'testgateway' => 
   array (
