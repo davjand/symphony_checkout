@@ -78,7 +78,7 @@ class contentExtensionSymphony_checkoutTesting extends AdministrationPage
 			// creates $savedSettings
 			include(dirname(__FILE__) . "/../config.php");
 			
-			$testOutput = print_r($testGateway->runTest($savedSettings[$_POST["action"]["requested"]]), true);
+			$testOutput = print_r($testGateway->runTest($savedSettings[strtolower($_POST["action"]["requested"])]), true);
 
 			// format the output
 			$testOutput = nl2br($testOutput);
