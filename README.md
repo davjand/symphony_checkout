@@ -37,7 +37,8 @@ The transaction field serves as an interface between the payment gateway and sym
 Process Payment Event
 -----------------------
 
-@TODO
+Please see event code
+
 
 Developer API
 ---------------
