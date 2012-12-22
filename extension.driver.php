@@ -10,7 +10,10 @@
 					`mappings` MEDIUMTEXT NOT NULL,
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
-			);');		
+			);');	
+			
+			$configFilename = dirname(__FILE__) . "/config.php";
+			file_put_contents($configFilename, "<?php \$savedSettings; ?>");	
 		
 		
 		}
