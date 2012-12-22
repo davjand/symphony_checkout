@@ -16,6 +16,9 @@ class TestGateway extends PaymentGateway {
 	public function getRequiredFieldsArray() {
 		return array();
 	}
+	public function getAmountFieldName(){
+		return 'Amount';
+	}
 	
 	public function processTransaction($transactionFieldData, $configuration) {
 	

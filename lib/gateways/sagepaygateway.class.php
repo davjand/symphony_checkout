@@ -34,9 +34,17 @@ class SagepayGateway extends PaymentGateway {
 			"DeliveryPhone",
 			"CustomerEmail",
 			"Description",
-			"Amount"
 		);
+	}
 	
+	/**
+	 * getAmountFieldName
+	 *
+	 * Returns the field name that should be used for the amount field
+	 * Needed so that the extension can tie up the amount field.
+	*/
+	public function getAmountFieldName(){
+		return "Amount";
 	}
 	
 	public function processTransaction($transactionFieldData, $configuration) {

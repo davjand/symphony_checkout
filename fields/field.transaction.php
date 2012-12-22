@@ -22,7 +22,7 @@
 			
 			// these are storable details that may be stored elsewhere in the section
 			// this are NOT a comprehensive list of what is required by the driver
-			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:||Description:||PaymentCompletedCheckbox:");
+			$this->set("mappings", "BillingFirstnames:||BillingSurname:||BillingAddress1:||BillingAddress2:||BillingCity:||BillingCountry:||BillingPostCode:||DeliveryFirstnames:||DeliverySurname:||DeliveryAddress1:||DeliveryAddress2:||DeliveryCity:||DeliveryCountry:||DeliveryPostCode:||DeliveryState:||DeliveryPhone:||CustomerEmail:||Description:||Amount:||PaymentCompletedCheckbox:");
 			
 		}
 

@@ -82,6 +82,7 @@ abstract class PaymentGateway {
 	abstract public function getConfigArray();
 	abstract public function getDetailsArray();
 	abstract public function getRequiredFieldsArray();
+	abstract public function getAmountFieldName();
 	
 	
 	/*******

@@ -33,9 +33,17 @@
 
 		public static function documentation(){
 			return '
-			&lt;h2&gt;Payment Processing Event&lt;/h2&gt;
+			<h3>Payment Processing Event</h3>
 			<p>The event allows payment processing through the checkout extension</p>
-			
+			<h3>Sample Form</h3>
+			<pre class="xml"><code>
+	&lt;form method=&quot;post&quot; action=&quot;&quot;&gt;
+  			&lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;{entry-id}&quot;/&gt;
+ 			 &lt;input type=&quot;hidden&quot; name=&quot;fields[transaction_field_name][Description]&quot; value=&quot;A Description for the transaction&quot;/&gt;
+ 			 &lt;input type=&quot;hidden&quot; name=&quot;fields[transaction_field_name][gateway] value = &quot;sagepaygateway&quot; /&gt; (OPTIONAL)
+ 			 &lt;input type=&quot;submit&quot; name=&quot;action[process-payment]&quot; value=&quot;Submit&quot;/&gt;
+ &lt;/form&gt;
+			</pre></code>
 			';
 		}
 
@@ -113,14 +121,23 @@
 			return $mappedValue;
 		}
 		
-		
 		/**
 		 * load
+		 *
+		*/
+		public function load(){
+			if(isset($_POST['action']['process-payment'])){
+				return $this->__trigger();
+			}
+		}
+		
+		/**
+		 * __trigger
 		 *
 		 *
 		 *
 		*/
-		public function load(){
+		public function __trigger(){
 			
 			$TESTING = false;
 			if($_POST["fields"]["test"]) {
@@ -134,6 +151,7 @@
 				
 				// create the transactiondata array
 				$transactionData = array();
+				$transactionEntryId = $_POST['id'];
 
 				// resolve the transaction field from the entry id
 				$section_id = EntryManager::fetchEntrySectionID($_POST["id"]);
@@ -146,16 +164,11 @@
 						$transactionFieldName = $transactionField->get('element_name');
 					}	
 				}
-				
 				if($transactionField == null || $transactionFieldName == null){
 					throw new Exception('No Transaction Field Found');
 				}
 				
-				// put all the posted values in the transactiondata array
-				$transactionData = array_merge($transactionData, $_POST["fields"][$transactionFieldName]);				
 				
-				$rawFieldMappings = $transactionField->get('mappings');
-				$fieldMappings = self::processRawMappings($rawFieldMappings);
 				
 				include(dirname(__FILE__) . "/../lib/gatewayfactory.class.php");
 				
@@ -175,23 +188,39 @@
 				if($gateway == null){
 					throw new Exception('Process Payments: Invalid Gateway');
 				}
-
+				
+				/*
+				 * ! Build the transaction data into the correct format
+				 *
+				*/
+				
 				// for any missing required values, transfer data using the mappings
+				$transactionData = array_merge($transactionData, $_POST["fields"][$transactionFieldName]);				
+				
+				//get the field mappings from the transaction field
+				$fieldMappings = self::processRawMappings($transactionField->get('mappings'));
+				
+				//use all the mappings to build the array
 				self::transferMappings($transactionData, $gateway->getRequiredFieldsArray(), $fieldMappings, $section_id);
+				
+				//Process the amount field (special case)
+				$transactionAmount = null;
+				$transactionAmount = self::mappedFieldToValue($fieldMappings['Amount'], $section_id, $transactionEntryId);				
+				$transactionData[$gateway->getAmountFieldName()] = $transactionAmount;
 						
 				// post everything through the gateway
 				$gatewayResponse = $gateway->processTransaction($transactionData, $savedSettings[$savedSettings["general"]["gateway"]]);
 				
 				// save posted information into the section - default event behavior
 				// creates $result
-				$_POST["fields"][$transactionField->get('element_name')]["gateway"] = $savedSettings["general"]["gateway"];
-				$_POST["fields"][$transactionField->get('element_name')]["total-amount"] = $_POST["fields"]["Amount"];
-				$_POST["fields"][$transactionField->get('element_name')]["accepted-ok"] = ($gatewayResponse["status"] == "OK" ? "on" : "off");
-				$_POST["fields"][$transactionField->get('element_name')]["security-key"] = $gatewayResponse["security-key"];
-				$_POST["fields"][$transactionField->get('element_name')]["local-transaction-id"] = $gatewayResponse["local-txid"];
-				$_POST["fields"][$transactionField->get('element_name')]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
-				$_POST["fields"][$transactionField->get('element_name')]["returned-info"] = $gatewayResponse["detail"];
-				
+				$_POST["fields"][$transactionFieldName] = array();
+				$_POST["fields"][$transactionFieldName]["gateway"] = $gwName;
+				$_POST["fields"][$transactionFieldName]["total-amount"] = $transactionAmount;
+				$_POST["fields"][$transactionFieldName]["accepted-ok"] = ($gatewayResponse["status"] == "OK" ? "on" : "off");
+				$_POST["fields"][$transactionFieldName]["security-key"] = $gatewayResponse["security-key"];
+				$_POST["fields"][$transactionFieldName]["local-transaction-id"] = $gatewayResponse["local-txid"];
+				$_POST["fields"][$transactionFieldName]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
+				$_POST["fields"][$transactionFieldName]["returned-info"] = $gatewayResponse["detail"];
 				
 				self::$targetSection = $section_id;
 				include(TOOLKIT . '/events/event.section.php');
