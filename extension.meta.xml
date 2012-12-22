@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension id="multicom_plugin" status="unreleased" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+<extension id="symphony_checkout" status="unreleased" xmlns="http://symphony-cms.com/schemas/extension/1.0">
 	<name>Symphony Checkout</name>
 	<description>Provides functionality to construct transactions and run them through payment gateways</description>
-	<url type="discuss">http://www.devjet.co.uk</url>
+	<url type="discuss">http://www.veodesign.co.uk</url>
 	<types>
 		<type>Custom</type>
 	</types>
 	<authors>
 		<author>
-			<name github="symphonycms" symphony="team">Tom Johnson</name>
+			<name github="davjand">David Anderson</name>
+			<website>http://www.veodesign.co.uk</website>
+		</author>
+		<author>
+			<name github="jetbackwards">Tom Johnson</name>
 			<website>http://www.devjet.co.uk</website>
 		</author>
 	</authors>
 	<releases>
-		<release version="0.9.1" date="2012-11-28" min="2.3">
+		<release version="0.9.2" date="2012-11-28" min="2.3">
 			- Started
 		</release>
 	</releases>	

@@ -61,7 +61,6 @@ class SagepayGateway extends PaymentGateway {
 			CustomerEmail
 			Amount
 		*/
-	
 		$uniqueTxId = $this->generateUniqueTxCode($transactionFieldData);
 	
 		$constantArray = array(
@@ -85,7 +84,7 @@ class SagepayGateway extends PaymentGateway {
 			default:
 				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=VendorRegisterTx";			
 		}
-	
+
 		$response = $this->doPost($url, $postData);
 		
 		// TODO: strip out the fields that we need to
