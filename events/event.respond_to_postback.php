@@ -42,7 +42,7 @@
 		public function load(){
 			
 			// creates $savedSettings;
-			include(dirname(__FILE__) . "/../config.php");
+			$savedSettings = extension_symphony_checkout::getConfig();
 			
 			// create the gateway
 			include(dirname(__FILE__) . "/../lib/gatewayfactory.class.php");

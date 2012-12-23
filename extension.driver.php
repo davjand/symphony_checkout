@@ -12,10 +12,9 @@
 					KEY `field_id` (`field_id`)
 			);');	
 			
-			$configFilename = dirname(__FILE__) . "/config.php";
-			file_put_contents($configFilename, "<?php \$savedSettings; ?>");	
-		
-		
+			
+			// make an initial config file
+			self::saveConfig(array());
 		}
 	
 		public function fetchNavigation(){ 
@@ -56,6 +55,19 @@
 					'callback' => 'modifyHeaders'
 				)
 			);
+		}
+		
+		public static function getConfig() {
+			include(self::getConfigPath());
+			return $savedSettings;
+		}
+		
+		public static function saveConfig($config) {
+			file_put_contents(self::getConfigPath(), "<?php \$savedSettings = " . var_export($config, true) . "; ?>");			
+		}
+		
+		private static function getConfigPath() {
+			return (MANIFEST . "/sc_config.php");		
 		}
 
 	}

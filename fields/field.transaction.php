@@ -58,12 +58,10 @@
 	
 		public function commit(){
 
-			if(!parent::commit()) return false;
-			
-			$id = $this->get('id');
+			if(!parent::commit() || $this->get('id') === false || $this->handle() === false) {
+				return false;
+			}
 
-			if($id === false) return false;
-			
 			$fields = array();
 			
 			$fields['field_id'] = $id;

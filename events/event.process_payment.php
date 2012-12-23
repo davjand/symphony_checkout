@@ -147,11 +147,11 @@
 			if(isset($_POST["id"]) || $TESTING) {				
 				
 				// creates $savedSettings;
-				include(dirname(__FILE__) . "/../config.php");
+				$savedSettings = extension_symphony_checkout::getConfig();
 				
 				// create the transactiondata array
 				$transactionData = array();
-				$transactionEntryId = $_POST['id'];
+				$transactionEntryId = $_POST['id'];	
 
 				// resolve the transaction field from the entry id
 				$section_id = EntryManager::fetchEntrySectionID($_POST["id"]);

@@ -46,11 +46,7 @@ class contentExtensionSymphony_checkoutIndex extends AdministrationPage
 	
 	public function action() {
 		if(isset($_POST["action"]["save"])) {
-			
-			$configFilename = dirname(__FILE__) . "/../config.php";
-			
-			file_put_contents($configFilename, "<?php \$savedSettings = " . var_export($_POST["settings"], true) . "; ?>");
-		
+			extension_symphony_checkout::saveConfig($_POST["settings"]);
 			$this->pageAlert(__('Configuration Settings updated successfully.'), Alert::SUCCESS);
 		}
 	}
@@ -68,7 +64,7 @@ class contentExtensionSymphony_checkoutIndex extends AdministrationPage
 	
 		
 		// Get the saved settings from the file - this will populate $savedSettings
-		include(dirname(__FILE__) . "/../config.php");
+		$savedSettings = extension_symphony_checkout::getConfig();
 	
 		// Link to testing
 		$linkSet = new XMLElement('fieldset');
