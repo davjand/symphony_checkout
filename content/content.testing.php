@@ -76,7 +76,7 @@ class contentExtensionSymphony_checkoutTesting extends AdministrationPage
 			
 			// give it some config - if this might alter it from test behaviour then each gateway test routine should allow for this
 			// creates $savedSettings
-			include(dirname(__FILE__) . "/../config.php");
+			$savedSettings = extension_symphony_checkout::getConfig();
 			
 			$testOutput = print_r($testGateway->runTest($savedSettings[strtolower($_POST["action"]["requested"])]), true);
 
