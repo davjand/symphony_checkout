@@ -29,7 +29,6 @@ class contentExtensionSymphony_checkoutTesting extends AdministrationPage
     public function build()
     {
         parent::build();
-		$this->setPageType('form');
         $this->setTitle('Symphony - Checkout Testing');
 		
     }

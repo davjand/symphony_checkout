@@ -30,7 +30,7 @@ class contentExtensionSymphony_checkoutIndex extends AdministrationPage
     public function build()
     {
         parent::build();
-		$this->setPageType('form');
+		
         $this->setTitle('Symphony - Configure Checkout');
 		
     }
