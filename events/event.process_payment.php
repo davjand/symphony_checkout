@@ -41,6 +41,7 @@
   			&lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;{entry-id}&quot;/&gt;
  			 &lt;input type=&quot;hidden&quot; name=&quot;fields[transaction_field_name][Description]&quot; value=&quot;A Description for the transaction&quot;/&gt;
  			 &lt;input type=&quot;hidden&quot; name=&quot;fields[transaction_field_name][gateway] value = &quot;sagepaygateway&quot; /&gt; (OPTIONAL)
+ 			 &lt;input type=&quot;hidden&quot; name=&quot;return-url&quot; value = &quot;http://mysite.com/mycustomurl&quot; /&gt; (OPTIONAL)
  			 &lt;input type=&quot;submit&quot; name=&quot;action[process-payment]&quot; value=&quot;Submit&quot;/&gt;
  &lt;/form&gt;
 			</pre></code>

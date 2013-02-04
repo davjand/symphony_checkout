@@ -32,7 +32,7 @@
 		}
 
 		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null) {
-			$max_length = Symphony::Configuration()->get('cell_truncation_length', 'symphony');
+			$max_length = Symphony::Configuration()->get("cell_truncation_length", "symphony");
 			$max_length = ($max_length ? $max_length : 75);	
 
 			// only this line is modified from the default
