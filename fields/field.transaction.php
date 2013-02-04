@@ -65,7 +65,7 @@
 
 			$fields = array();
 			
-			$fields['field_id'] = $id;
+			$fields['field_id'] = $this->get('id');
 		
 			$useMappings = "";
 			foreach($this->get('mappings') as $k => $v) {
