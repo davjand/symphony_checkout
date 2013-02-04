@@ -221,6 +221,8 @@
 				$_POST["fields"][$transactionFieldName]["local-transaction-id"] = $gatewayResponse["local-txid"];
 				$_POST["fields"][$transactionFieldName]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
 				$_POST["fields"][$transactionFieldName]["returned-info"] = $gatewayResponse["detail"];
+				// allows setting of return url on a transaction-by-transaction basis
+				$_POST["fields"][$transactionFieldName]["return-url"] = ( isset($_POST["return-url"]) ? $_POST["return-url"] : $savedSettings[$savedSettings["general"]["gateway"]]["return-url"] );
 				
 				self::$targetSection = $section_id;
 				include(TOOLKIT . '/events/event.section.php');

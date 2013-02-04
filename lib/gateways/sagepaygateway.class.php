@@ -200,7 +200,7 @@ class SagepayGateway extends PaymentGateway {
 			
 			
 			return array(
-				"return-value" => "Status=OK\r\nRedirectURL=" . $configuration["return-url"] . "\r\nStatusDetail=Notification received successfully",
+				"return-value" => "Status=OK\r\nRedirectURL=" . $storedData["return-url"] . "\r\nStatusDetail=Notification received successfully",
 				"status" => $status
 				);
 				
@@ -208,7 +208,7 @@ class SagepayGateway extends PaymentGateway {
 		else {
 	
 			return array(
-				"return-value" => "Status=INVALID\r\nRedirectURL=" . $configuration["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
+				"return-value" => "Status=INVALID\r\nRedirectURL=" . $storedData["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
 				"status" => "failed"
 				);	
 	

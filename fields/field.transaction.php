@@ -12,7 +12,8 @@
 						"local-transaction-id" => "text",						
 						"remote-transaction-id" => "text",
 						"security-key" => "text",
-						"returned-info" => "text"
+						"returned-info" => "text",
+						"return-url" => "text"
 					);
 	
 		public function __construct() {
