@@ -12,6 +12,7 @@
 						"local-transaction-id" => "text",						
 						"remote-transaction-id" => "text",
 						"security-key" => "text",
+						"auth-number" => "text",
 						"returned-info" => "text",
 						"return-url" => "text"
 					);

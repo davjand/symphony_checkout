@@ -109,6 +109,8 @@ abstract class PaymentGateway {
 	*******/	
 	abstract public function processPaymentNotification($returnData, $storedData, $configuration);
 
+	abstract public function processReleasePayment($storedData, $paymentSuccessful, $configuration);
+	
 	abstract public function runTest($configuration);
 	
 }

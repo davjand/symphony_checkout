@@ -101,7 +101,7 @@ class SagepayGateway extends PaymentGateway {
 				"detail" => $response["StatusDetail"],
 				"local-txid" => $uniqueTxId, 
 				"remote-txid" => $response["VPSTxId"], 
-				"security-key" => $response["SecurityKey"], 
+				"security-key" => $response["SecurityKey"],
 				"redirect-url" => $response["NextURL"]
 			);
 		
@@ -201,7 +201,8 @@ class SagepayGateway extends PaymentGateway {
 			
 			return array(
 				"return-value" => "Status=OK\r\nRedirectURL=" . $storedData["return-url"] . "\r\nStatusDetail=Notification received successfully",
-				"status" => $status
+				"status" => $status,
+				"tx-auth-no" => $returnData["TxAuthNo"]
 				);
 				
 		}
@@ -214,6 +215,39 @@ class SagepayGateway extends PaymentGateway {
 	
 		}
 	
+	}
+	
+	public function processReleasePayment($storedData, $paymentSuccessful, $configuration) {
+		
+		$postArray = array(
+			"VPSProtocol" => "2.23",
+			"TxType" => ($paymentSuccessful ? "RELEASE" : "ABORT"),
+			"Vendor" => $configuration["vendor-name"],
+			"VendorTxCode" => $storedData["local-transaction-id"],
+			"VPSTxId" => $storedData["remote-transaction-id"],
+			"SecurityKey" => $storedData["security-key"],
+			"TxAuthNo" => $storedData["auth-number"]
+			);	
+
+		if($paymentSuccessful) {
+			$postArray["ReleaseAmount"] = $storedData["total-amount"];	
+		}
+		
+		$url = "";
+		// default the url simulator - much safer
+		switch($configuration["connect-to"]) {
+			case "LIVE":
+				$url = "https://live.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
+			case "TEST":
+				$url = "https://test.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
+			default:
+				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=" . ( $paymentSuccessful ? "release" : "abort" );			
+		}
+
+		$response = $this->doPost($url, $postData);
+
+		return strtolower($response["Status"]);		
+		
 	}
 	
 	public function runTest($configuration) {

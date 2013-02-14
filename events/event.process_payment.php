@@ -219,6 +219,7 @@
 				$_POST["fields"][$transactionFieldName]["total-amount"] = $transactionAmount;
 				$_POST["fields"][$transactionFieldName]["accepted-ok"] = ($gatewayResponse["status"] == "OK" ? "on" : "off");
 				$_POST["fields"][$transactionFieldName]["security-key"] = $gatewayResponse["security-key"];
+				$_POST["fields"][$transactionFieldName]["auth-number"] = "";
 				$_POST["fields"][$transactionFieldName]["local-transaction-id"] = $gatewayResponse["local-txid"];
 				$_POST["fields"][$transactionFieldName]["remote-transaction-id"] = $gatewayResponse["remote-txid"];
 				$_POST["fields"][$transactionFieldName]["returned-info"] = $gatewayResponse["detail"];

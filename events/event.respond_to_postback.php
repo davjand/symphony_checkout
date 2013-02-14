@@ -97,6 +97,7 @@
 			
 			// save the result in the field
 			$storedData["processed-ok"] = ($gatewayResponse["status"] == "completed" ? "on" : "off");
+			$storedData["auth-number"] = $gatewayResponse["tx-auth-no"];
 			$_POST["fields"][$theField->get('element_name')] = $storedData;
 			
 			// save the result in the mappings
