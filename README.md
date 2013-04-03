@@ -6,6 +6,18 @@ Symphony Checkout Extension
 * Date: 21/12/2012
 * Requirements: Symphony 2.3 or later
 
+
+Symphony Checkout is an extension that aims to bring more robust payment functionality to symphony. Inspired by paypal payments and PGI loader, Symphony Checkout provides a Transaction field that can be used to store the relevent data to process a transaction.
+
+A 'Transaction' field goes into a section whoes entries represent a payment. The field can then map in data from the other fields in the entry (such as names, addresses, emails etc) in order to pass the relevent data to a payment processor. The field can then post the data to the payment processor via an event and then reconcile the transaction into the field.
+
+Currently only sagepay server integration is supported but a test payment gateway class is provided which can be extended for any other payment gateway.
+
+@TODO Finish documentation
+
+NB: Currently the price field is grabbed from the section which means that it has to be pre populated. For use on a 'basket' based ecommerce website, your basket extension needs to save the data into the section. There are obviously security issues here that need to be resolved but this extension currently doesn't cater for that. I have a cart extension (davjand/symphony_cart) that could potentially be integrated in the future.
+
+
 Installation
 ---------------
 
