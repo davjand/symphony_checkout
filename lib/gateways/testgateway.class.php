@@ -67,7 +67,7 @@ class TestGateway extends PaymentGateway {
 			$dummyRequiredFields = array("Test1", "Test2", "Test3", "Test4", "Test5");
 			$dummyProcessedMappings = array("Test3" => "!!!", "Test4" => "????");
 			
-			eventprocess_payment::transferMappings(&$dummyTransactionData, $dummyRequiredFields, $dummyProcessedMappings, true);
+			eventprocess_payment::transferMappings($dummyTransactionData, $dummyRequiredFields, $dummyProcessedMappings, true);
 			$output["Mappings Transfer"] = array(
 				"Transferred Fields Ok" => (($dummyTransactionData["Test3"] == "ok" && $dummyTransactionData["Test4"] == "ok") ? "ok" : "failed"),
 				"Count Preserved" => ((count($dummyTransactionData) == 5) ? "ok" : "failed")
