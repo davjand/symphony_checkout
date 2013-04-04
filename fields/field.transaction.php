@@ -67,6 +67,8 @@
 			$fields = array();
 			
 			$fields['field_id'] = $this->get('id');
+			
+			$id=$fields['field_id'];
 		
 			$useMappings = "";
 			foreach($this->get('mappings') as $k => $v) {
@@ -75,7 +77,7 @@
 			$useMappings = substr($useMappings, 0, -2);
 			
 			$fields['mappings'] = $useMappings;
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
+			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
 				
 			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
 					

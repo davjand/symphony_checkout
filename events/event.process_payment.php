@@ -1,6 +1,8 @@
 <?php
 	require_once(EXTENSIONS . '/symql/lib/class.symql.php');
 	require_once(TOOLKIT . '/class.event.php');
+	
+	require_once(dirname(__FILE__) . "/../lib/checkout.class.php");
 
 	Class eventprocess_payment extends Event{
 

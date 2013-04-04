@@ -5,7 +5,7 @@ include_once(dirname(__FILE__) . "/../gateway.class.php");
 class SagepayGateway extends PaymentGateway {
 
 	public function getConfigArray() {
-		return array("connect-to", "description", "vendor-name", "currency", "transaction-type", "notification-url", "return-url");	
+		return array("connect-to", "description", "vendor-name", "currency", "transaction-type", "notification-url", "return-url","profile");	
 	}
 	
 	public function getDetailsArray() {
@@ -48,7 +48,37 @@ class SagepayGateway extends PaymentGateway {
 	}
 	
 	public function processTransaction($transactionFieldData, $configuration) {
-	
+		
+		/*
+		
+			Run some pre-flight checks
+			
+		*/
+		$conf = $configuration;
+		
+		if($conf["vendor-name"] == null || strlen($conf["vendor-name"])==0){
+			throw new Exception("SP00:Cannot Process Transaction, Vendor Name not set");
+		}
+		if($conf['transaction-type'] == null || strlen($conf['transaction-type'])==0){
+			throw new Exception("SP00:Cannot Process Transaction, TxType not set");
+		}
+		if($conf['currency'] == null || strlen($conf['currency'])==0){
+			throw new Exception("SP00:Cannot Process Transaction, Currency not set");
+		}
+		if($conf['notification-url'] == null || strlen($conf['notification-url'])==0){
+			throw new Exception("SP00:Cannot Process Transaction, Notification URL not set");
+		}
+		if($conf['description'] == null || strlen($conf['description'])==0){
+			throw new Exception("SP00:Cannot Process Transaction, Default Description not set");
+		}
+		if($conf['profile'] == null || strlen($conf['profile'])==0){
+			throw new Exception("SP00:Cannot Process Transaction, Profile not set");
+		}
+		
+		if($transactionFieldData['description'] == null || strlen($transactionFieldData['description'])==0){
+			$transactionFieldData['description']=$conf['description'];
+		}
+		
 		/* transaction field data should contain...
 			BillingFirstnames
 			BillingSurname
@@ -77,8 +107,10 @@ class SagepayGateway extends PaymentGateway {
 			"Vendor" => $configuration["vendor-name"],
 			"VendorTxCode" => $uniqueTxId,
 			"Currency" => $configuration["currency"],
-			"NotificationURL" => $configuration["notification-url"]
+			"NotificationURL" => $configuration["notification-url"],
+			"Profile" => $configuration["profile"] == "LOW" ? "LOW" : "NORMAL",
 			);
+			
 			
 		$postData = array_merge($constantArray, $transactionFieldData);
 		
