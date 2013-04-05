@@ -30,8 +30,12 @@ class SymphonyCheckout{
 		Gets the configuration	
 	*/
 	public static function getConfig() {
-		include(self::getConfigPath());
-		return $savedSettings;
+		$path = self::getConfigPath();
+			
+			if(!file_exists($path)){
+				self::saveConfig(array());
+			}
+			include($path);
 	}
 	
 	

@@ -58,7 +58,13 @@
 		}
 		
 		public static function getConfig() {
-			include(self::getConfigPath());
+			
+			$path = self::getConfigPath();
+			
+			if(!file_exists($path)){
+				self::saveConfig(array());
+			}
+			include($path);	
 			return $savedSettings;
 		}
 		
