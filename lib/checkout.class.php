@@ -23,6 +23,7 @@ class SymphonyCheckout{
 	function __construct(){
 		
 		$this->settings = self::getConfig();
+		
 		return;
 	}
 	
@@ -32,10 +33,12 @@ class SymphonyCheckout{
 	public static function getConfig() {
 		$path = self::getConfigPath();
 			
-			if(!file_exists($path)){
-				self::saveConfig(array());
-			}
-			include($path);
+		if(!file_exists($path)){
+			self::saveConfig(array());
+		}
+		include($path);
+		
+		return $savedSettings;
 	}
 	
 	
@@ -123,6 +126,7 @@ class SymphonyCheckout{
 			Determine the gateway
 			
 		*/
+		
 		if($gatewayHandle == null){
 			$gatewayHandle = $this->settings['general']['gateway'];
 		}
