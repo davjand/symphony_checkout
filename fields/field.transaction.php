@@ -8,13 +8,16 @@
 						"gateway" => "text",
 						"total-amount" => "text",
 						"accepted-ok" => "checkbox",
+						"deferred-ok" => "checkbox",
 						"processed-ok" => "checkbox",
+						"tx-type" => "text",
 						"local-transaction-id" => "text",						
 						"remote-transaction-id" => "text",
 						"security-key" => "text",
 						"auth-number" => "text",
 						"returned-info" => "text",
-						"return-url" => "text"
+						"return-url" => "text",
+						"tx-data" => "textarea"
 					);
 	
 		public function __construct() {
@@ -145,7 +148,12 @@
 			$query = "CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (`id` int(11) unsigned NOT NULL auto_increment,`entry_id` int(11) unsigned NOT NULL,";
 			
 			foreach($this->subFields as $f => $t) {
-				$query .= "`{$f}` varchar(255) default NULL,";
+				if($f=='tx-data'){
+					$query .= "`{$f}` MEDIUMTEXT default NULL,";
+				}
+				else{
+					$query .= "`{$f}` varchar(255) default NULL,";
+				}
 			}
 			
 			$query .= "PRIMARY KEY  (`id`), KEY `entry_id` (`entry_id`)) TYPE=MyISAM;";
@@ -167,7 +175,16 @@
 			foreach($this->subFields as $f => $t) {
 				$tr = new XMLElement("tr");
 				$tr->appendChild(new XMLElement("td", $this->__prettifyValue($f)));
-				$tr->appendChild(new XMLElement("td", $data[$f]));
+				
+				if($f == 'tx-data'){
+					$str = str_replace("\n","<br/>",$data[$f]);
+					$tr->appendChild(new XMLElement("td",$str ));	
+				}
+				else{
+					$tr->appendChild(new XMLElement("td", $data[$f]));	
+				}
+				
+				
 				$table->appendChild($tr);
 			}
 			$container->appendChild($table);

@@ -126,14 +126,8 @@ class SymphonyCheckout{
 			Determine the gateway
 			
 		*/
-		
-		if($gatewayHandle == null){
-			$gatewayHandle = $this->settings['general']['gateway'];
-		}
-		if($gatewayHandle == 'test' || $gatewayHandle == null){
-			throw new Exception("Invalid Gateway");
-		}
-		$gateway = PaymentGatewayFactory::createGateway($gatewayHandle);
+		$gatewayHandle = $this->settings['general']['gateway'];
+		$gateway = $this->getGateway();
 		
 		
 		/*
@@ -175,7 +169,7 @@ class SymphonyCheckout{
 			Send to the gateway
 			
 		*/	
-		$gatewayResponse = $gateway->processTransaction($transactionData, $this->settings[$gatewayHandle]);
+		$gatewayResponse = $gateway->processTransaction($entryId, $transactionData, $this->settings[$gatewayHandle]);
 		
 		
 		/*
@@ -183,27 +177,130 @@ class SymphonyCheckout{
 			Process the gateway response and save into symphony
 			
 		*/
-		$data = array(
-			$transactionFieldName => array(
-				'gateway' => $gatewayHandle,
-				'total-amount' => $transactionAmount,
-				'accepted-ok' => ($gatewayResponse["status"] == "OK" ? "on" : "off"),
-				'security-key' => $gatewayResponse["security-key"],
-				'auth-number' => '',
-				'local-transaction-id' => $gatewayResponse["local-txid"],
-				'remote-transaction-id' => $gatewayResponse["remote-txid"],
-				'returned-info' => $gatewayResponse["detail"],
-				'return-url' => $this->settings[$this->settings["general"]["gateway"]]["return-url"]
-		));
+		$fieldData = array(
+			'gateway' => $gatewayHandle,
+			'return-url' => $this->settings[$gatewayHandle]['return-url']
+		);		
+		$this->mergePaymentResponseIntoField($fieldData,$gatewayResponse['fieldData']);
 		
+		//print_r($fieldData);die();
+				
+		$dataToSave[$transactionField->get('element_name')]=$fieldData;
 		$errors = array();
-		$entry->setDataFromPost($data,$errors, false, true);
+		$entry->setDataFromPost($dataToSave,$errors, false, true);
 		$entry->commit();
+		
+		return $gatewayResponse;
+	}	
+	
+	
+	/**
+	
+		Process an IPN postback
+		
+		@param Array $data Usually the $_REQUEST array	
+		
+	*/
+
+	function processIPN($data){
+		
+		/*
+		
+			Determine the gateway . Entry
+			
+		*/
+		$gateway = $this->getGateway();
+		$txCode = $gateway->extractLocalTxId($data);
+		$entryId = $gateway->getEntryIdFromTxCode($txCode);
+		$sectionId = EntryManager::fetchEntrySectionID($entryId);
+				
+		$entry = $this->getEntryFromId($entryId);
+		$field = $this->getTransactionField($entryId);
+
+		$storedData = $entry->getData($field->get('id'));
+		
+		/**
+		
+			Process the response
+			
+		*/
+		$gatewayResponse = $gateway->processPaymentNotification($data, $storedData, $this->getGatewaySettings());
+		
+		
+		/**
+		
+			Save the response into the field
+			
+		*/
+		//merge the response data
+		$this->mergePaymentResponseIntoField($storedData,$gatewayResponse['fieldData']);
+		$dataToSave = array(
+			$field->get('element_name') => $storedData
+		);
+				
+		//process the 'completed checkbox'
+		$mappings = $this->getKeyValueCodedMappings($field->get('mappings'));
+		
+		if(array_key_exists('PaymentCompletedCheckbox',$mappings) && $mappings['PaymentCompletedCheckbox'] != null){
+			$dataToSave[$mappings['PaymentCompletedCheckbox']] = $storedData["processed-ok"];
+		}
+		
+		$entry->setDataFromPost($dataToSave, $errors, false, true);
+		$entry->commit();
+		
+		//add the entryId to the response
+		$gatewayResponse['entryId']=$entryId;
 		
 		return $gatewayResponse;
 	}
 	
 	
+	/**
+	
+		Either release or abort a deferred payment
+		
+		@param Integer $entryId The Entry ID
+		@param Boolean $release true to release / false to abort
+	
+	*/	
+	function processDeferredPayment($entryId,$release){
+	
+		$gateway = $this->getGateway();
+		$sectionId = EntryManager::fetchEntrySectionID($entryId);
+				
+		$entry = $this->getEntryFromId($entryId);
+		$field = $this->getTransactionField($entryId);
+
+		$storedData = $entry->getData($field->get('id'));
+		
+		$gatewayResponse = $gateway->processDeferredPayment($storedData, $release, $this->getGatewaySettings());
+		
+		/**
+		
+			Save the response into the field
+			
+		*/
+		$this->mergePaymentResponseIntoField($storedData,$gatewayResponse['fieldData']);
+		$dataToSave = array(
+			$field->get('element_name') => $storedData
+		);
+				
+		//process the 'completed checkbox'
+		$mappings = $this->getKeyValueCodedMappings($field->get('mappings'));
+		
+		if(array_key_exists('PaymentCompletedCheckbox',$mappings) && $mappings['PaymentCompletedCheckbox'] != null){
+			$dataToSave[$mappings['PaymentCompletedCheckbox']] = $storedData["processed-ok"];
+		}
+		
+		$entry->setDataFromPost($dataToSave, $errors, false, true);
+		$entry->commit();
+		
+		//add the entryId to the response
+		$gatewayResponse['entryId']=$entryId;
+		
+		return $gatewayResponse;
+		
+	}
 
 	
 	
@@ -222,6 +319,86 @@ class SymphonyCheckout{
 	*/
 	
 	
+	/**
+		Return the current active gateway
+		throws an error if not set
+	*/
+	public function getGateway(){
+	
+		$gatewayHandle = $this->settings['general']['gateway'];
+		
+		if($gatewayHandle == 'test' || $gatewayHandle == null){
+			throw new Exception("Invalid Gateway");
+		}
+		return PaymentGatewayFactory::createGateway($gatewayHandle);	
+	}
+	
+	/**
+	
+		Get the currently active gateway specific settings
+		
+	*/
+	public function getGatewaySettings(){
+		$gatewayHandle = $this->settings['general']['gateway'];
+		return $this->settings[$gatewayHandle];
+	}
+	
+	/**
+		Function to merge a new payment response into the current data array
+		
+		Uses the storedData field to maintain an audit trail
+	*/
+	protected function mergePaymentResponseIntoField(&$storedData,$fieldData){
+		foreach($fieldData as $key => $val){
+			if($key == 'tx-data'){
+				//create an audit trail
+				$date = new DateTime();
+				
+				if(strlen($storedData[$key]) < 1){
+					//$storedData[$key]= "";
+				}
+				 $storedData[$key] = $storedData[$key] . $date->format('Y-m-d H:i:s')."\n\n".$fieldData[$key]."\n\n\n";
+			}
+			else{
+				$storedData[$key] = $val;
+			}
+		}
+	}
+	
+
+	
+	/**
+	
+		A function to convert a mappings string into a key/value coded arrau
+		
+		@param String $mappings
+		@returns Array
+		
+	*/
+	public function getKeyValueCodedMappings($mappings){
+		$mappings = explode("||",$mappings);
+		
+		if(count($mappings)<1){
+			return array();
+		}
+		
+		$arr = array();
+		foreach($mappings as $m){
+			$map = explode(':',$m);
+			if(count($map)!=2){
+				throw new Exception("Checkout: Invalid Mappings Data (".$m.")");
+			}
+			$arr[$map[0]] = $map[1];
+		}
+		return $arr;
+	}
+
+	
+	/**
+	
+		Process raw field mappings
+		
+	*/
 	public function processRawMappings($rawFieldMappings) {
 		$fieldMappings = array();
 		foreach(explode("||", $rawFieldMappings) as $f) {

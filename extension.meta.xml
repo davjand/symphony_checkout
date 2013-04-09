@@ -17,6 +17,12 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="0.9.7" date="2013-04-09" min="2.3" max="2.3.x">
+			Return Data Storage
+		</release>
+		<release version="0.9.3" date="2013-04-09" min="2.3" max="2.3.x">
+			Field Updated
+		</release>
 		<release version="0.9.2" date="2012-11-28" min="2.3" max="2.3.x">
 			- Started
 		</release>

@@ -20,7 +20,7 @@ class TestGateway extends PaymentGateway {
 		return 'Amount';
 	}
 	
-	public function processTransaction($transactionFieldData, $configuration) {
+	public function processTransaction($entryId, $transactionFieldData, $configuration) {
 	
 		print_r($transactionFieldData);
 		print_r($configuration);
@@ -29,7 +29,7 @@ class TestGateway extends PaymentGateway {
 	
 	public function processPaymentNotification($returnData, $storedData, $configuration) {}
 	
-	public function processReleasePayment($storedData, $paymentSuccessful, $configuration) {}
+	public function processDeferredPayment($storedData, $paymentSuccessful, $configuration) {}
 	
 	public function extractLocalTxId($returnData) {}
 	

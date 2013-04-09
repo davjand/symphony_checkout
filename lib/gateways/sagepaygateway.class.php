@@ -47,7 +47,13 @@ class SagepayGateway extends PaymentGateway {
 		return "Amount";
 	}
 	
-	public function processTransaction($transactionFieldData, $configuration) {
+	
+	/**
+		Process a transaction
+		
+	*/
+	
+	public function processTransaction($entryId, $transactionFieldData, $configuration) {
 		
 		/*
 		
@@ -99,7 +105,7 @@ class SagepayGateway extends PaymentGateway {
 			CustomerEmail
 			Amount
 		*/
-		$uniqueTxId = $this->generateUniqueTxCode($transactionFieldData);
+		$uniqueTxId = $this->generateUniqueTxCode($entryId);
 	
 		$constantArray = array(
 			"VPSProtocol" => "2.23",
@@ -114,6 +120,13 @@ class SagepayGateway extends PaymentGateway {
 			
 		$postData = array_merge($constantArray, $transactionFieldData);
 		
+		
+		$fieldData = array(
+			'total-amount' => $postData[$this->getAmountFieldName()],
+			'tx-type' => $postData["TxType"]
+		);
+		
+		
 		$url = "";
 		// default the url simulator - much safer
 		switch($configuration["connect-to"]) {
@@ -125,26 +138,189 @@ class SagepayGateway extends PaymentGateway {
 				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=VendorRegisterTx";			
 		}
 
-		$response = $this->doPost($url, $postData);
+		$response = $this->doPost($url, $postData);		
 		
-		// TODO: strip out the fields that we need to
+		$fieldData['accepted-ok'] = $response["Status"]== "OK" ? "on" : "off";
+		$fieldData['returned-info'] = $response["Status"] ." (".$response["StatusDetail"].")";
+		$fieldData['security-key'] = $response["SecurityKey"];
+		$fieldData['auth-number'] = '';
+		$fieldData['local-transaction-id'] = $uniqueTxId;
+		$fieldData['remote-transaction-id'] = $response["VPSTxId"];
+		$fieldData['tx-data'] = print_r($response,true);
+		
 		return array(
-				"status" => $response["Status"], 
-				"detail" => $response["StatusDetail"],
-				"local-txid" => $uniqueTxId, 
-				"remote-txid" => $response["VPSTxId"], 
-				"security-key" => $response["SecurityKey"],
-				"redirect-url" => $response["NextURL"]
-			);
+			'apiResponse' => $response,
+			'fieldData' => $fieldData
+		);	
+	}
+
+	
+	
+	/**
+	
+		IPN function to process IPN response
 		
+	*/
+	public function processPaymentNotification($returnData, $storedData, $configuration) {
+		
+		
+		// clean everything - can affect the md5
+		foreach($returnData as $k => $v) {
+			$returnData[$k] = $this->__cleanInput($v, "Text");
+		}	
+		foreach($storedData as $k => $v) {
+			$storedData[$k] = $this->__cleanInput($v, "Text");
+		}	
+		foreach($configuration as $k => $v) {
+			$configuration[$k] = $this->__cleanInput($v, "Text");
+		}	
+	
+		//check signature first!
+		$checkStr = "";
+		$checkStr .= $returnData["VPSTxId"];
+		$checkStr .= $returnData["VendorTxCode"];
+		$checkStr .= $returnData["Status"];
+		$checkStr .= $returnData["TxAuthNo"];
+		$checkStr .= $configuration["vendor-name"];
+		$checkStr .= $returnData["AVSCV2"];
+		$checkStr .= $storedData["security-key"];
+		$checkStr .= $returnData["AddressResult"];
+		$checkStr .= $returnData["PostCodeResult"];
+		$checkStr .= $returnData["CV2Result"];
+		$checkStr .= $returnData["GiftAid"];
+		$checkStr .= $returnData["3DSecureStatus"];
+		$checkStr .= $returnData["CAVV"];
+		$checkStr .= $returnData["AddressStatus"];
+		$checkStr .= $returnData["PayerStatus"];
+		$checkStr .= $returnData["CardType"];
+		$checkStr .= $returnData["Last4Digits"];
+		
+		
+		$date = new DateTime();
+		
+		$fieldData = array(
+			'tx-type' => $returnData['TxType'],
+			'tx-data' => print_r($returnData,true),
+			'auth-number' => $returnData['TxAuthNo'],
+			'returned-info' => $returnData["Status"]." (".$returnData["StatusDetail"].")"
+		);
+		
+		if(md5($checkStr) == strtolower($returnData["VPSSignature"])) {
+			
+			// we need to acknowledge a failure, but return a failed status
+			$status = "failed";
+			if($returnData["Status"] == "OK") {
+				$status = "completed";
+			}
+			
+			if($fieldData['tx-type']=='DEFERRED'){
+				$fieldData['deferred-ok'] = 'on';
+				$fieldData['processed-ok'] = 'off';
+			}
+			else{
+				$fieldData['processed-ok'] = 'on';	
+			}
+			
+			//build an array to be re-integrated into the response
+			
+			return array(
+				"return-value" => "Status=OK\r\nRedirectURL=" . $storedData["return-url"] . "\r\nStatusDetail=Notification received successfully",
+				"status" => $status,
+				'fieldData' => $fieldData
+				);
+				
+		}
+		else {
+			
+			$fieldData['deferred-ok'] = 'off';
+			$fieldData['processed-ok'] = 'off';
+	
+			return array(
+				"return-value" => "Status=INVALID\r\nRedirectURL=" . $storedData["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
+				"status" => "failed",
+				'fieldData' => $fieldData
+				);	
+	
+		}
 	
 	}
 	
+	/**
+	
+	
+		Function to process a deferred payment, either release or abort it
+		
+		@param Array $storedDate - the field data that is currently saved
+		@param Boolean $paymentSuccessful - Release / Abort
+		@param Array $configuration
+		
+		
+		
+	*/
+	public function processDeferredPayment($storedData, $paymentSuccessful, $configuration) {
+		
+		$postArray = array(
+			"VPSProtocol" => "2.23",
+			"TxType" => ($paymentSuccessful ? "RELEASE" : "ABORT"),
+			"Vendor" => $configuration["vendor-name"],
+			"VendorTxCode" => $storedData["local-transaction-id"],
+			"VPSTxId" => $storedData["remote-transaction-id"],
+			"SecurityKey" => $storedData["security-key"],
+			"TxAuthNo" => $storedData["auth-number"]
+			);	
+
+		if($paymentSuccessful) {
+			$postArray["ReleaseAmount"] = $storedData["total-amount"];	
+		}
+		
+		$url = "";
+		// default the url simulator - much safer
+		switch($configuration["connect-to"]) {
+			case "LIVE":
+				$url = "https://live.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
+			case "TEST":
+				$url = "https://test.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
+			default:
+				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=" . ( $paymentSuccessful ? "VendorReleaseTx" : "VendorAbortTx" );			
+		}
+		$sageResponse = $this->doPost($url, $postArray);
+
+		$fieldData = array(
+			'tx-type' => $postArray['TxType'],
+			'returned-info' => $sageResponse["Status"]." (".$sageResponse["StatusDetail"].")",
+			'tx-data' => print_r($sageResponse,true)
+		);
+		
+		if($paymentSuccessful && $sageResponse['Status']=="OK"){
+			$fieldData['processed-ok']='on';
+		}
+		
+		$response = array(
+			'gateway' => $sageResponse,
+			'fieldData' => $fieldData
+		);
+
+		return $response;		
+		
+	}
+	
+	
+		
+	/**
+
+		Gets the transaction code from the IPN Data
+		
+	*/
 	public function extractLocalTxId($returnData) {
 		return $returnData["VendorTxCode"];
 	}
 
-	// Filters unwanted characters out of an input string.  Useful for tidying up FORM field inputs
+	/**
+	
+		Filters unwanted characters out of an input string.
+		Useful for tidying up FORM field inputs
+		
+	*/
 	private function __cleanInput($strRawText,$strType)
 	{
 
@@ -186,100 +362,6 @@ class SagepayGateway extends PaymentGateway {
 		$cleanInput = ltrim($strCleanedText);
 		return $cleanInput;
 
-	}
-	
-	public function processPaymentNotification($returnData, $storedData, $configuration) {
-		
-		
-		// clean everything - can affect the md5
-		foreach($returnData as $k => $v) {
-			$returnData[$k] = $this->__cleanInput($v, "Text");
-		}	
-		foreach($storedData as $k => $v) {
-			$storedData[$k] = $this->__cleanInput($v, "Text");
-		}	
-		foreach($configuration as $k => $v) {
-			$configuration[$k] = $this->__cleanInput($v, "Text");
-		}	
-	
-		//check signature first!
-		$checkStr = "";
-		$checkStr .= $returnData["VPSTxId"];
-		$checkStr .= $returnData["VendorTxCode"];
-		$checkStr .= $returnData["Status"];
-		$checkStr .= $returnData["TxAuthNo"];
-		$checkStr .= $configuration["vendor-name"];
-		$checkStr .= $returnData["AVSCV2"];
-		$checkStr .= $storedData["security-key"];
-		$checkStr .= $returnData["AddressResult"];
-		$checkStr .= $returnData["PostCodeResult"];
-		$checkStr .= $returnData["CV2Result"];
-		$checkStr .= $returnData["GiftAid"];
-		$checkStr .= $returnData["3DSecureStatus"];
-		$checkStr .= $returnData["CAVV"];
-		$checkStr .= $returnData["AddressStatus"];
-		$checkStr .= $returnData["PayerStatus"];
-		$checkStr .= $returnData["CardType"];
-		$checkStr .= $returnData["Last4Digits"];
-
-		if(md5($checkStr) == strtolower($returnData["VPSSignature"])) {
-			
-			// we need to acknowledge a failure, but return a failed status
-			$status = "failed";
-			if($returnData["Status"] == "OK") {
-				$status = "completed";
-			}
-			
-			
-			return array(
-				"return-value" => "Status=OK\r\nRedirectURL=" . $storedData["return-url"] . "\r\nStatusDetail=Notification received successfully",
-				"status" => $status,
-				"tx-auth-no" => $returnData["TxAuthNo"]
-				);
-				
-		}
-		else {
-	
-			return array(
-				"return-value" => "Status=INVALID\r\nRedirectURL=" . $storedData["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
-				"status" => "failed"
-				);	
-	
-		}
-	
-	}
-	
-	public function processReleasePayment($storedData, $paymentSuccessful, $configuration) {
-		
-		$postArray = array(
-			"VPSProtocol" => "2.23",
-			"TxType" => ($paymentSuccessful ? "RELEASE" : "ABORT"),
-			"Vendor" => $configuration["vendor-name"],
-			"VendorTxCode" => $storedData["local-transaction-id"],
-			"VPSTxId" => $storedData["remote-transaction-id"],
-			"SecurityKey" => $storedData["security-key"],
-			"TxAuthNo" => $storedData["auth-number"]
-			);	
-
-		if($paymentSuccessful) {
-			$postArray["ReleaseAmount"] = $storedData["total-amount"];	
-		}
-		
-		$url = "";
-		// default the url simulator - much safer
-		switch($configuration["connect-to"]) {
-			case "LIVE":
-				$url = "https://live.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
-			case "TEST":
-				$url = "https://test.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
-			default:
-				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=" . ( $paymentSuccessful ? "release" : "abort" );			
-		}
-
-		$response = $this->doPost($url, $postData);
-
-		return strtolower($response["Status"]);		
-		
 	}
 	
 	public function runTest($configuration) {
