@@ -357,7 +357,7 @@ class SymphonyCheckout{
 				if(strlen($storedData[$key]) < 1){
 					//$storedData[$key]= "";
 				}
-				 $storedData[$key] = $storedData[$key] . $date->format('Y-m-d H:i:s')."\n\n".$fieldData[$key]."\n\n\n";
+				 $storedData[$key] = $storedData[$key] . $date->format('Y-m-d H:i:s')."\n".$fieldData[$key]."\n\n";
 			}
 			else{
 				$storedData[$key] = $val;
