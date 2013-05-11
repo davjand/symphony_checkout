@@ -129,13 +129,18 @@ class SagepayGateway extends PaymentGateway {
 		
 		$url = "";
 		// default the url simulator - much safer
+		
+		
 		switch($configuration["connect-to"]) {
 			case "LIVE":
 				$url = "https://live.sagepay.com/gateway/service/vspserver-register.vsp";
+				break;
 			case "TEST":
 				$url = "https://test.sagepay.com/gateway/service/vspserver-register.vsp";
+				break;
 			default:
 				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=VendorRegisterTx";			
+				break;
 		}
 
 		$response = $this->doPost($url, $postData);		
@@ -278,10 +283,13 @@ class SagepayGateway extends PaymentGateway {
 		switch($configuration["connect-to"]) {
 			case "LIVE":
 				$url = "https://live.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
+				break;
 			case "TEST":
+				break;
 				$url = "https://test.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
 			default:
-				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=" . ( $paymentSuccessful ? "VendorReleaseTx" : "VendorAbortTx" );			
+				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=" . ( $paymentSuccessful ? "VendorReleaseTx" : "VendorAbortTx" );
+				break;		
 		}
 		$sageResponse = $this->doPost($url, $postArray);
 

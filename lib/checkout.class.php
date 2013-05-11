@@ -128,7 +128,7 @@ class SymphonyCheckout{
 		*/
 		$gatewayHandle = $this->settings['general']['gateway'];
 		$gateway = $this->getGateway();
-		
+
 		
 		/*
 		
@@ -182,8 +182,6 @@ class SymphonyCheckout{
 			'return-url' => $this->settings[$gatewayHandle]['return-url']
 		);		
 		$this->mergePaymentResponseIntoField($fieldData,$gatewayResponse['fieldData']);
-		
-		//print_r($fieldData);die();
 				
 		$dataToSave[$transactionField->get('element_name')]=$fieldData;
 		$errors = array();
