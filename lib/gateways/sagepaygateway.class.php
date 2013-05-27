@@ -213,26 +213,31 @@ class SagepayGateway extends PaymentGateway {
 			'returned-info' => $returnData["Status"]." (".$returnData["StatusDetail"].")"
 		);
 		
+		$returnUrlString = "?success=no";
+		
 		if(md5($checkStr) == strtolower($returnData["VPSSignature"])) {
 			
 			// we need to acknowledge a failure, but return a failed status
 			$status = "failed";
+			
 			if($returnData["Status"] == "OK") {
 				$status = "completed";
+				$fieldData['processed-ok'] = 'on';	
+				
+				$returnUrlString = "?success=yes";
 			}
-			
-			if($fieldData['tx-type']=='DEFERRED'){
+			elseif($fieldData['tx-type']=='DEFERRED'){
 				$fieldData['deferred-ok'] = 'on';
 				$fieldData['processed-ok'] = 'off';
+				
+				$returnUrlString = "?success=yes";
 			}
-			else{
-				$fieldData['processed-ok'] = 'on';	
-			}
+
 			
 			//build an array to be re-integrated into the response
 			
 			return array(
-				"return-value" => "Status=OK\r\nRedirectURL=" . $storedData["return-url"] . "\r\nStatusDetail=Notification received successfully",
+				"return-value" => "Status=OK\r\nRedirectURL=" . $storedData["return-url"].$returnUrlString . "\r\nStatusDetail=Notification received successfully",
 				"status" => $status,
 				'fieldData' => $fieldData
 				);
@@ -244,7 +249,7 @@ class SagepayGateway extends PaymentGateway {
 			$fieldData['processed-ok'] = 'off';
 	
 			return array(
-				"return-value" => "Status=INVALID\r\nRedirectURL=" . $storedData["return-url"] . "{$eoln}StatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
+				"return-value" => "Status=INVALID\r\nRedirectURL=" . $storedData["return-url"].$returnUrlString . "\r\nStatusDetail=VPSSignature was incorrect " . md5($checkStr) . " computed " . strtolower($returnData["VPSSignature"]) . " expected",
 				"status" => "failed",
 				'fieldData' => $fieldData
 				);	
