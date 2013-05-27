@@ -138,7 +138,7 @@ class SagepayGateway extends PaymentGateway {
 			case "TEST":
 				$url = "https://test.sagepay.com/gateway/service/vspserver-register.vsp";
 				break;
-			case :"SHOWPOST":
+			case "SHOWPOST":
 				$url="https://test.sagepay.com/showpost/showpost.asp";
 				break;
 			default:
