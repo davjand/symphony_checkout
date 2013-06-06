@@ -108,7 +108,7 @@ class SagepayGateway extends PaymentGateway {
 		$uniqueTxId = $this->generateUniqueTxCode($entryId);
 	
 		$constantArray = array(
-			"VPSProtocol" => "2.23",
+			"VPSProtocol" => "3.00",
 			"TxType" => $configuration["transaction-type"],
 			"Vendor" => $configuration["vendor-name"],
 			"VendorTxCode" => $uniqueTxId,
