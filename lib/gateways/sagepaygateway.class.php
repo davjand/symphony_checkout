@@ -5,7 +5,7 @@ include_once(dirname(__FILE__) . "/../gateway.class.php");
 class SagepayGateway extends PaymentGateway {
 
 	public function getConfigArray() {
-		return array("connect-to", "description", "vendor-name", "currency", "transaction-type", "notification-url", "return-url","profile");	
+		return array("connect-to", "description", "vendor-name", "currency", "transaction-type", "notification-url", "return-url","profile","version");	
 	}
 	
 	public function getDetailsArray() {
@@ -108,7 +108,7 @@ class SagepayGateway extends PaymentGateway {
 		$uniqueTxId = $this->generateUniqueTxCode($entryId);
 	
 		$constantArray = array(
-			"VPSProtocol" => "3.00",
+			"VPSProtocol" => $configuration['version'],
 			"TxType" => $configuration["transaction-type"],
 			"Vendor" => $configuration["vendor-name"],
 			"VendorTxCode" => $uniqueTxId,
@@ -223,12 +223,12 @@ class SagepayGateway extends PaymentGateway {
 			if($returnData["Status"] == "OK") {
 				$status = "completed";
 				$fieldData['processed-ok'] = 'on';	
+				
 				$returnUrlString = "?success=yes";
 			}
 			elseif($fieldData['tx-type']=='DEFERRED'){
 				$fieldData['deferred-ok'] = 'on';
 				$fieldData['processed-ok'] = 'off';
-				$status = "completed";
 				
 				$returnUrlString = "?success=yes";
 			}
@@ -273,7 +273,7 @@ class SagepayGateway extends PaymentGateway {
 	public function processDeferredPayment($storedData, $paymentSuccessful, $configuration) {
 		
 		$postArray = array(
-			"VPSProtocol" => "3.00",
+			"VPSProtocol" => $configuration['version'],
 			"TxType" => ($paymentSuccessful ? "RELEASE" : "ABORT"),
 			"Vendor" => $configuration["vendor-name"],
 			"VendorTxCode" => $storedData["local-transaction-id"],
