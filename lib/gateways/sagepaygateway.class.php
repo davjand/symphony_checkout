@@ -273,7 +273,7 @@ class SagepayGateway extends PaymentGateway {
 	public function processDeferredPayment($storedData, $paymentSuccessful, $configuration) {
 		
 		$postArray = array(
-			"VPSProtocol" => "2.23",
+			"VPSProtocol" => "3.00",
 			"TxType" => ($paymentSuccessful ? "RELEASE" : "ABORT"),
 			"Vendor" => $configuration["vendor-name"],
 			"VendorTxCode" => $storedData["local-transaction-id"],
