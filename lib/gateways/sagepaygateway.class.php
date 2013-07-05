@@ -224,13 +224,13 @@ class SagepayGateway extends PaymentGateway {
 				$status = "completed";
 				$fieldData['processed-ok'] = 'on';	
 				$returnUrlString = "?success=yes";
-			}
-			elseif($fieldData['tx-type']=='DEFERRED'){
-				$fieldData['deferred-ok'] = 'on';
-				$fieldData['processed-ok'] = 'off';
-				$status = "completed";
-				$returnUrlString = "?success=yes";
-			}
+				
+				if($fieldData['tx-type']=='DEFERRED'){
+					$fieldData['deferred-ok'] = 'on';
+					$fieldData['processed-ok'] = 'off';
+				}
+				
+			}			
 
 			
 			//build an array to be re-integrated into the response
@@ -308,6 +308,9 @@ class SagepayGateway extends PaymentGateway {
 		
 		if($paymentSuccessful && $sageResponse['Status']=="OK"){
 			$fieldData['processed-ok']='on';
+		}
+		else{
+			$fieldData['processed-ok']='off';	
 		}
 		
 		$response = array(
