@@ -160,7 +160,11 @@ class SymphonyCheckout{
 		
 		//Process the amount field (special case)
 		$transactionAmount = null;
-		$transactionAmount = $this->mappedFieldToValue($fieldMappings['Amount'], $entryId);				
+		$transactionAmount = $this->mappedFieldToValue($fieldMappings['Amount'], $entryId);
+		
+		//format the amount
+		$transactionAmount = number_format(floatval($transactionAmount),2, '.', '');
+					
 		$transactionData[$gateway->getAmountFieldName()] = $transactionAmount;
 				
 		
