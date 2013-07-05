@@ -292,8 +292,8 @@ class SagepayGateway extends PaymentGateway {
 				$url = "https://live.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
 				break;
 			case "TEST":
-				break;
 				$url = "https://test.sagepay.com/gateway/service/" . ( $paymentSuccessful ? "release" : "abort" ) . ".vsp";
+				break;
 			default:
 				$url = "https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=" . ( $paymentSuccessful ? "VendorReleaseTx" : "VendorAbortTx" );
 				break;		
