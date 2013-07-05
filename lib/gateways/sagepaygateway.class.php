@@ -114,7 +114,7 @@ class SagepayGateway extends PaymentGateway {
 			"VendorTxCode" => $uniqueTxId,
 			"Currency" => $configuration["currency"],
 			"NotificationURL" => $configuration["notification-url"],
-			"Profile" => $configuration["profile"] == "LOW" ? "LOW" : "NORMAL",
+			"Profile" => ($configuration["profile"] == "LOW" ? "LOW" : "NORMAL"),
 			);
 			
 			
