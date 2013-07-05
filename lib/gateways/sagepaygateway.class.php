@@ -311,7 +311,7 @@ class SagepayGateway extends PaymentGateway {
 		}
 		elseif($sageResponse['Status']=="INVALID"){
 			//If invalid, capture debug info
-			$fieldData['tx-data'] = $fieldData['tx-data'].'\nREQUEST WAS:\n'.print_r($postData,true);
+			$fieldData['tx-data'] = $fieldData['tx-data']."\nREQUEST WAS:\n".print_r($postArray,true);
 		}
 		else{
 			$fieldData['processed-ok']='off';
