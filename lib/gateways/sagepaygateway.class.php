@@ -154,7 +154,7 @@ class SagepayGateway extends PaymentGateway {
 		$fieldData['auth-number'] = '';
 		$fieldData['local-transaction-id'] = $uniqueTxId;
 		$fieldData['remote-transaction-id'] = $response["VPSTxId"];
-		$fieldData['tx-data'] = print_r($response,true);
+		$fieldData['tx-data'] = $url."\n".print_r($response,true);
 		
 		return array(
 			'apiResponse' => $response,
@@ -311,7 +311,7 @@ class SagepayGateway extends PaymentGateway {
 		}
 		elseif($sageResponse['Status']=="INVALID"){
 			//If invalid, capture debug info
-			$fieldData['tx-data'] = $fieldData['tx-data']."\nREQUEST WAS:\n".print_r($postArray,true);
+			$fieldData['tx-data'] = $fieldData['tx-data']."\nREQUEST WAS:\n".$url."\n".print_r($postArray,true);
 		}
 		else{
 			$fieldData['processed-ok']='off';
