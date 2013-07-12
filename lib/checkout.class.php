@@ -108,6 +108,31 @@ class SymphonyCheckout{
 	}
 	
 	
+	/**
+	
+		Get the transaction field Data from an entry Id
+		
+	*/
+	public function getTransactionDataFromId($entryId){
+		$entry = $this->getEntryFromId($entryId);
+		$field = $this->getTransactionField($entryId);
+
+		return $entry->getData($field->get('id'));	
+	}
+	
+	/**
+		
+		Find out if a deferred payment was successful
+		
+	*/
+	public function isDeferredPaymentSuccess($entryId){
+		$data = $this->getTransactionDataFromId($entryId);
+		
+		if($data['accepted-ok'] == 'on' && $data['deferred-ok'] == 'on' && $data['processed-ok'] == 'off'){
+			return true;
+		}
+		return false;
+	}
 	
 	
 	/**
