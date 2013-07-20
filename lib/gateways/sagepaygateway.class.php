@@ -186,23 +186,49 @@ class SagepayGateway extends PaymentGateway {
 	
 		//check signature first!
 		$checkStr = "";
-		$checkStr .= $returnData["VPSTxId"];
-		$checkStr .= $returnData["VendorTxCode"];
-		$checkStr .= $returnData["Status"];
-		$checkStr .= $returnData["TxAuthNo"];
-		$checkStr .= $configuration["vendor-name"];
-		$checkStr .= $returnData["AVSCV2"];
-		$checkStr .= $storedData["security-key"];
-		$checkStr .= $returnData["AddressResult"];
-		$checkStr .= $returnData["PostCodeResult"];
-		$checkStr .= $returnData["CV2Result"];
-		$checkStr .= $returnData["GiftAid"];
-		$checkStr .= $returnData["3DSecureStatus"];
-		$checkStr .= $returnData["CAVV"];
-		$checkStr .= $returnData["AddressStatus"];
-		$checkStr .= $returnData["PayerStatus"];
-		$checkStr .= $returnData["CardType"];
-		$checkStr .= $returnData["Last4Digits"];
+		
+		if($configuration['version'] == "3.00"){
+			$checkStr .= $returnData["VPSTxId"];
+			$checkStr .= $returnData["VendorTxCode"];
+			$checkStr .= $returnData["Status"];
+			$checkStr .= $returnData["TxAuthNo"];
+			$checkStr .= $configuration["vendor-name"];
+			$checkStr .= $returnData["AVSCV2"];
+			$checkStr .= $storedData["security-key"];
+			$checkStr .= $returnData["AddressResult"];
+			$checkStr .= $returnData["PostCodeResult"];
+			$checkStr .= $returnData["CV2Result"];
+			$checkStr .= $returnData["GiftAid"];
+			$checkStr .= $returnData["3DSecureStatus"];
+			$checkStr .= $returnData["CAVV"];
+			$checkStr .= $returnData["AddressStatus"];
+			$checkStr .= $returnData["PayerStatus"];
+			$checkStr .= $returnData["CardType"];
+			$checkStr .= $returnData["Last4Digits"];
+			$checkStr .= $returnData["DeclineCode"];
+			$checkStr .= $returnData["ExpiryDate"];
+			$checkStr .= $returnData["FraudResponse"];
+			$checkStr .= $returnData["BankAuthCode"];
+		}
+		else{
+			$checkStr .= $returnData["VPSTxId"];
+			$checkStr .= $returnData["VendorTxCode"];
+			$checkStr .= $returnData["Status"];
+			$checkStr .= $returnData["TxAuthNo"];
+			$checkStr .= $configuration["vendor-name"];
+			$checkStr .= $returnData["AVSCV2"];
+			$checkStr .= $storedData["security-key"];
+			$checkStr .= $returnData["AddressResult"];
+			$checkStr .= $returnData["PostCodeResult"];
+			$checkStr .= $returnData["CV2Result"];
+			$checkStr .= $returnData["GiftAid"];
+			$checkStr .= $returnData["3DSecureStatus"];
+			$checkStr .= $returnData["CAVV"];
+			$checkStr .= $returnData["AddressStatus"];
+			$checkStr .= $returnData["PayerStatus"];
+			$checkStr .= $returnData["CardType"];
+			$checkStr .= $returnData["Last4Digits"];
+		}
 		
 		
 		$date = new DateTime();
