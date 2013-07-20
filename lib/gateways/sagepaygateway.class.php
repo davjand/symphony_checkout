@@ -240,6 +240,11 @@ class SagepayGateway extends PaymentGateway {
 			'returned-info' => $returnData["Status"]." (".$returnData["StatusDetail"].")"
 		);
 		
+		if($configuration['version'] == "3.00"){
+			$fieldData['surcharge'] = $returnData["Surcharge"];
+		}
+		
+		
 		$returnUrlString = "?success=no";
 		
 		if(md5($checkStr) == strtolower($returnData["VPSSignature"])) {

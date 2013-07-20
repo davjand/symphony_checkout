@@ -30,6 +30,37 @@
 		
 		public function update($previousVersion = false){
 			
+			/*
+				
+				v0.9.8
+				
+			*/
+			if(version_compare($previousVersion, '0.9.8', '<')){
+				try{
+					$fields = Symphony::Database()->fetchCol('field_id',
+						"SELECT `field_id` FROM `tbl_fields_transaction`"
+					);
+				}
+				catch(Exception $e){
+					// Discard
+				}
+
+				if(is_array($fields) && !empty($fields)){
+					foreach($fields as $field_id){
+						try{
+							Symphony::Database()->query(
+								"ALTER TABLE `tbl_entries_data_{$field_id}`
+								ADD COLUMN `surcharge` VARCHAR(255) default NULL"
+							);
+						}
+						catch(Exception $e){
+							// Discard
+						}
+					}
+				}
+			}
+			
+			
 			if(version_compare($previousVersion, '0.9.7', '<')){
 				try{
 					$fields = Symphony::Database()->fetchCol('field_id',

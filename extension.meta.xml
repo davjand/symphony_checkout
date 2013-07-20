@@ -17,6 +17,9 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="0.9.8" date="2013-07-20" min="2.3" max="2.3.x">
+			Surcharge Support Added
+		</release>
 		<release version="0.9.7" date="2013-04-09" min="2.3" max="2.3.x">
 			Return Data Storage
 		</release>

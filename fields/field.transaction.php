@@ -7,6 +7,7 @@
 		private $subFields = array(
 						"gateway" => "text",
 						"total-amount" => "text",
+						"surcharge" => "text",
 						"accepted-ok" => "checkbox",
 						"deferred-ok" => "checkbox",
 						"processed-ok" => "checkbox",
