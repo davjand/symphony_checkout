@@ -5,7 +5,7 @@ include_once(dirname(__FILE__) . "/../gateway.class.php");
 class SagepayGateway extends PaymentGateway {
 
 	public function getConfigArray() {
-		return array("connect-to", "description", "vendor-name", "currency", "transaction-type", "notification-url", "return-url","profile","version");	
+		return array("connect-to", "description", "vendor-name", "currency", "transaction-type", "notification-url", "return-url","profile","version", 'surcharge-xml');	
 	}
 	
 	public function getDetailsArray() {
@@ -115,6 +115,7 @@ class SagepayGateway extends PaymentGateway {
 			"Currency" => $configuration["currency"],
 			"NotificationURL" => $configuration["notification-url"],
 			"Profile" => ($configuration["profile"] == "LOW" ? "LOW" : "NORMAL"),
+			"SurchargeXML" => ($configuration['surcharge-xml']),
 			);
 			
 			
